@@ -539,7 +539,9 @@ func getMedal(pos int) string {
   if (pos>2) {
     y=mypos[1]
   }
-  //fmt.Println("Got Pix:",pix(x,y).R,pix(x,y).G,pix(x,y).B)
+  if config.screen {
+    fmt.Println("GETMEDAL Got Pix:",pix(x,y).R,pix(x,y).G,pix(x,y).B)
+  }
   if (pix(x,y).R>89) {
     if (pix(x,y).G>89) {
       if (pix(x,y).B>89) {
@@ -654,7 +656,9 @@ func guessHero(col int, row int) string {
     inl=pix(xpos[col],ypenemy[0])
     inh=pix(xpos[col],ypenemy[1])
   }
-  //fmt.Println("Got pix ",inl,inh)
+  if config.screen {
+    fmt.Println("GUESSHERO: Got pix ",inl,inh)
+  }
 
   for _, el := range heros {
       tot=0
@@ -681,7 +685,9 @@ func guessHero(col int, row int) string {
         score=tot
         found=el.name
       }
-      //fmt.Println("Checked ",el.name," score=",tot," dev=",dev)
+      if config.screen {
+        fmt.Println("GUESSHERO: Checked ",el.name," score=",tot," dev=",dev)
+      }
   }
   if (score>2) {
     found="unknown"
