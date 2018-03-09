@@ -2,6 +2,7 @@ package main
 
 import (
   "github.com/fatih/color"
+  "github.com/go-ini/ini"
   "github.com/mertyGit/owig/screenshot"
   "github.com/mertyGit/owig/owocr"
   "fmt"
@@ -11,6 +12,7 @@ import (
   "os/exec"
   "time"
   "strings"
+  "path/filepath"
 )
 
 
@@ -77,6 +79,21 @@ type TeamComp struct {
 
 var game GameInfo
 
+
+// ----------------------------------------------------------------------------
+// Configuration struct
+
+type Ini struct {
+  sleep int
+  stats string
+  divider string
+  header bool
+  screen bool
+  ocr bool
+  pause int
+}
+
+var config Ini
 
 // ----------------------------------------------------------------------------
 // captured or loaded image with screen information
@@ -687,7 +704,7 @@ func getGroups() {
       xpos  = []int{570,762,954,1146,1338}
       ypos  = []int{310,620}
   }
-  for x:=0;x<5;x++ {
+  for x:=0;x<6;x++ {
     game.enemy.groupid[x]=0
     game.own.groupid[x]=0
   }
@@ -877,6 +894,8 @@ func dumpTabStats() {
       } else {
         if game.own.groupid[x]>0 {
           color.Set(color.FgHiWhite)
+        } else {
+          color.Set(color.FgWhite)
         }
       }
       fmt.Printf(" %-10s",guessHero(x,1))
@@ -1045,18 +1064,78 @@ func interpret() {
   }
 }
 
+// ----------------------------------------------------------------------------
+// Read "owig.ini" file
+
+func getIni() {
+  config.sleep=1000
+  config.stats="owig_stats.csv"
+  config.divider=","
+  config.header=true
+  config.screen=false
+  config.ocr=false
+  config.pause=2000
+
+  wd,_:=os.Getwd();
+  // Try working directory
+  inifile:=wd+"\\owig.ini"
+  cfg,err := ini.InsensitiveLoad(inifile)
+  if err != nil {
+    // Try directory .exe is located
+    bd:=filepath.Dir(os.Args[0])
+    inifile2:=bd+"\\owig.ini"
+    cfg,err = ini.InsensitiveLoad(inifile2)
+    fmt.Println("Warning: can't read inifile ",inifile," or ",inifile2)
+    return
+  }
+  // Got INI file, so lets read it //
+  if cfg.Section("main").HasKey("sleep") {
+    config.sleep,_=cfg.Section("main").Key("sleep").Int()
+  }
+  if cfg.Section("output").HasKey("stats") {
+    config.stats=cfg.Section("output").Key("stats").String()
+  }
+  if cfg.Section("output").HasKey("divider") {
+    config.divider=cfg.Section("output").Key("divider").String()
+  }
+  if cfg.Section("output").HasKey("header") {
+    config.header,_=cfg.Section("output").Key("header").Bool()
+  }
+  if cfg.Section("debug").HasKey("screen") {
+    config.screen,_=cfg.Section("debug").Key("screen").Bool()
+  }
+  if cfg.Section("debug").HasKey("ocr") {
+    config.ocr,_=cfg.Section("debug").Key("ocr").Bool()
+  }
+  if cfg.Section("debug").HasKey("pause") {
+    config.pause,_=cfg.Section("debug").Key("pause").Int()
+  }
+  // Set appropiate values, if needed
+  if config.ocr {
+    owocr.Debug=true
+  }
+}
+
 func main() {
 
+  getIni()
   initGameInfo()
   if (len(os.Args)>1) {
     // testing, debug with screenshots
-    loadFile(os.Args[1])
-    interpret()
+    for a:=1;a<len(os.Args);a++ {
+      initGameInfo()
+      loadFile(os.Args[a])
+      interpret()
+      fmt.Println("File: ",os.Args[a])
+      if (a+1<len(os.Args)) {
+        time.Sleep(time.Duration(config.pause) * time.Millisecond)
+      }
+    }
   } else {
     for {
       grabScreen()
       interpret()
-      time.Sleep(1000*time.Millisecond)
+      time.Sleep(time.Duration(config.sleep) * time.Millisecond)
     }
   }
 }

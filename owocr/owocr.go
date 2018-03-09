@@ -23,6 +23,7 @@ var imgOut *image.RGBA
 var width,height int
 var thresshold=150
 var filled=0
+var Debug=false
 
 func pixIn(x int, y int) Pixel {
   if x>width {
@@ -312,7 +313,9 @@ func getChar(xleft int,yleft int,font map[string][][]int) (string,int) {
   }
 
   // Output image to includable format, based on array size of "search" in font 
-  //dumpChar(xl,yt,xr,yb,font)
+  if Debug {
+    dumpChar(xl,yt,xr,yb,font)
+  }
 
   // check character against font
   ch=searchChar(xl,yt,xr,yb,font)
