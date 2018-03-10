@@ -5,6 +5,8 @@ import (
   "github.com/go-ini/ini"
   "github.com/mertyGit/owig/screenshot"
   "github.com/mertyGit/owig/owocr"
+  "github.com/lxn/walk"
+  . "github.com/lxn/walk/declarative"
   "fmt"
   "image"
   "image/png"
@@ -14,6 +16,12 @@ import (
   "strings"
   "path/filepath"
 )
+
+//Windows window struct
+type MyMainWindow struct {
+  *walk.MainWindow
+  paintWidget *walk.CustomWidget
+}
 
 
 // Pixel struct 
@@ -103,8 +111,6 @@ var img *image.RGBA
 // 0=3840x2160 (4K)
 // 1=1920x1080 (1080p)
 var res int
-
-
 
 // ----------------------------------------------------------------------------
 // Determine resolution type
@@ -863,6 +869,26 @@ func parseTabStats() {
   getGroups()
 }
 
+// ----------------------------------------------------------------------------
+// Draws window with information
+func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectangle) error {
+  bounds := mw.paintWidget.ClientBounds()
+
+  // Color background black
+  blackBrush,err:=walk.NewSolidColorBrush(walk.RGB(0,0,0))
+  if err != nil {
+    return err
+  }
+  defer blackBrush.Dispose()
+  canvas.FillRectangle(blackBrush,bounds)
+
+
+  return nil
+}
+
+// ----------------------------------------------------------------------------
+// Dump statistics on console
+
 func dumpTabStats() {
     cls()
     fmt.Println()
@@ -1122,8 +1148,7 @@ func getIni() {
   }
 }
 
-func main() {
-
+func mainLoop() {
   getIni()
   initGameInfo()
   if (len(os.Args)>1) {
@@ -1137,6 +1162,9 @@ func main() {
         time.Sleep(time.Duration(config.pause) * time.Millisecond)
       }
     }
+    for {
+      // wait till window is closed
+    }
   } else {
     for {
       grabScreen()
@@ -1144,4 +1172,27 @@ func main() {
       time.Sleep(time.Duration(config.sleep) * time.Millisecond)
     }
   }
+}
+
+func main() {
+  go mainLoop()
+
+  mw:= new(MyMainWindow)
+
+  icon,_ := walk.NewIconFromFile("owig256.ico")
+
+  MainWindow{
+    Title:   "OWIG",
+    Icon: icon,
+    MinSize:    Size{600, 400},
+    Layout:  VBox{MarginsZero:true},
+    Children: []Widget{
+      CustomWidget{
+        AssignTo:            &mw.paintWidget,
+        ClearsBackground:    true,
+        InvalidatesOnResize: true,
+        Paint:               mw.drawWindow,
+      },
+    },
+  }.Run()
 }
