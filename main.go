@@ -1,20 +1,16 @@
 package main
 
 import (
-  "github.com/fatih/color"
-  "github.com/go-ini/ini"
   "github.com/mertyGit/owig/screenshot"
   "github.com/mertyGit/owig/owocr"
   "github.com/lxn/walk"
   . "github.com/lxn/walk/declarative"
   "fmt"
   "image"
-  "image/png"
   "os"
-  "os/exec"
   "time"
   "strings"
-  "path/filepath"
+  "strconv"
 )
 
 //Windows window struct
@@ -22,6 +18,9 @@ type MyMainWindow struct {
   *walk.MainWindow
   paintWidget *walk.CustomWidget
 }
+var mainCanvas *walk.Canvas
+var mainRect walk.Rectangle
+var mainWindow *walk.MainWindow
 
 
 // Pixel struct 
@@ -50,20 +49,30 @@ const SC_MAIN       = 7
 const SC_ENDING     = 8
 
 // ----------------------------------------------------------------------------
+// Constants for game state
+const GS_NONE       = 1  // No game started or searching for game
+const GS_START      = 2  // Game Started (waiting / assemble)
+const GS_RUN        = 3  // Game is ongoing, stats might change later
+const GS_END        = 4  // Game Ended, showing results, stats are final
+
+// ----------------------------------------------------------------------------
 // Global variable to hold every information about the game thats is being played
 type GameInfo struct {
-  screen      int  // Found screen type (tab screen, overview screen etc.etc.)
-  pscreen     int  // Previous screen type (used to determine start/end of games, updates)
-  mapname  string  // Name of map we are playing, like "ILIOS" 
-  gametype string  // Game type, like "MYSTERY HEROES"  or "QUICK PLAY"
-  hero     string  // What the hero is playing at the moment  (equals to own.heroes[0])
-  enemy  TeamComp  // Enemy team composition (see below)
-  own    TeamComp  // Enemy team composition (see below)
-  stats  OwnStats  // Own statistics
+  screen      int    // Found screen type (tab screen, overview screen etc.etc.)
+  pscreen     int    // Previous screen type 
+  mapname  string    // Name of map we are playing, like "ILIOS" 
+  gametype string    // Game type, like "MYSTERY HEROES"  or "QUICK PLAY"
+  hero     string    // What the hero is playing at the moment = own.heroes[0]
+  enemy  TeamComp    // Enemy team composition (see below)
+  own    TeamComp    // Enemy team composition (see below)
+  stats  OwnStats    // Own statistics
   currentSR   int
   highestSR   int
-  result   string  // End result (won,lost,draw)
-  side     string  // attack or defend
+  result   string    // End result (won,lost,draw)
+  side     string    // attack or defend
+  dmsg     [4]string // debug messages
+  state       int    // state
+  image      bool    // are we using images instead of screenshots ?
 }
 
 type OwnStats struct {
@@ -96,9 +105,10 @@ type Ini struct {
   stats string
   divider string
   header bool
-  screen bool
-  ocr bool
-  pause int
+  dbg_screen bool
+  dbg_window bool
+  dbg_ocr bool
+  dbg_pause int
 }
 
 var config Ini
@@ -131,20 +141,6 @@ func setRes() {
   }
 }
 
-// ----------------------------------------------------------------------------
-// return pixel value at given coordinates
-
-func pix(x int, y int) Pixel {
-  if x>img.Bounds().Max.X {
-    x=img.Bounds().Max.X
-  }
-  if y>img.Bounds().Max.Y {
-    y=img.Bounds().Max.Y
-  }
-  r,g,b,_ := img.At(x, y).RGBA()
-  return Pixel{int(r/257),int(g/257),int(b/257)}
-}
-
 
 // ----------------------------------------------------------------------------
 // Capture Screen 
@@ -157,204 +153,6 @@ func grabScreen() {
     os.Exit(3)
   }
   setRes()
-}
-
-// ----------------------------------------------------------------------------
-// generate checksum based on average R,G,B color values in whole area
-// Used to check or validate if some menu items are on screen or not
-
-func areaAverage(xt int,yt int,xr int,yb int) string {
-  var R uint64
-  var G uint64
-  var B uint64
-
-  R=0
-  G=0
-  B=0
-  for x:=xt;x<xr;x++ {
-    for y:=yt;y<yb;y++ {
-      R+=uint64(pix(x,y).R)
-      G+=uint64(pix(x,y).G)
-      B+=uint64(pix(x,y).B)
-      //owocr.Plot(img,x,y,255,0,0)
-    }
-  }
-  if R+G+B<1 {
-    B=1
-  }
-  rc:=100*R/(R+G+B)
-  gc:=100*G/(R+G+B)
-  bc:=100*B/(R+G+B)
-  line:=fmt.Sprintf("%X%X%X",rc,gc,bc)
-  return line
-}
-
-// ----------------------------------------------------------------------------
-// Filter out artifacts and colors below thresshold
-func filter(xt int,yt int,xb int,yb int,tr int) {
-  for x:=xt;x<xb;x++ {
-    for y:=yt;y<yb;y++ {
-      P:=pix(x,y)
-      if P.R<tr && P.G<tr && P.B<tr {
-        owocr.Plot(img,x,y,0,0,0)
-      }
-    }
-  }
-  //owocr.SaveImg(img,"test.png")
-}
-
-// ----------------------------------------------------------------------------
-// Check to see if area has same color value (within max deviation)
-func sameColor(xt int,yt int,xb int,yb int,r int,g int,b int,dev int) bool {
-  var ret=true
-
-  for x:=xt;x<xb;x++ {
-    for y:=yt;y<yb;y++ {
-      P:=pix(x,y)
-      if ((P.R>r+dev)||(P.R<r-dev)||(P.G>g+dev)||(P.G<g-dev)||(P.B>b+dev)||(P.B<b-dev)) {
-        ret=false
-      }
-    }
-  }
-  return ret
-}
-
-// ----------------------------------------------------------------------------
-// Check to see if area has same color, based on which RGB values are the 
-// highest R=Red, G=Green, Y=yellow, B=blue, C=cyan, M=magenta
-func hasColor(xt int,yt int,xb int,yb int,c string) bool {
-  same:=true
-  for x:=xt;x<xb;x++ {
-    for y:=yt;y<yb;y++ {
-      P:=pix(x,y)
-      switch c {
-        case "R":
-          if !(P.R>P.G && P.R>P.B) {
-            same=false
-          }
-        case "G":
-          if !(P.G>P.R && P.G>P.B) {
-            same=false
-          }
-        case "Y":
-          if !(P.G>P.B && P.R>P.B) {
-            same=false
-          }
-        case "B":
-          if !(P.B>P.R && P.B>P.G) {
-            same=false
-          }
-        case "C":
-          if !(P.G>P.R && P.B>P.R) {
-            same=false
-          }
-        case "M":
-          if !(P.R>P.G && P.B>P.G) {
-            same=false
-          }
-        default:
-          same=false
-      }
-    }
-  }
-  return same
-}
-
-
-
-// Functions to intepret screen
-//
-
-// ----------------------------------------------------------------------------
-// Get positive difference between two ints (used for OCR stuff)
-
-func getDif(l int,r int) int {
-  var d=0;
-  if (l>r) {
-    d=l-r
-  } else {
-    d=r-l
-  }
-  return d
-}
-
-// ----------------------------------------------------------------------------
-// check if pixel is white (R,G,B > 224)
-
-func isWhite(x int,y int) bool {
-  return isAbove(x,y,224)
-}
-
-// ----------------------------------------------------------------------------
-// check if pixel all R,G and B do have value higher then given value
-
-func isAbove(x int,y int,tr int) bool {
-  if pix(x,y).R > tr && pix(x,y).G > tr && pix(x,y).B > tr {
-    return true
-  }
-  return false
-}
-
-
-// ----------------------------------------------------------------------------
-// Do we have a line with same r,g,b values ? 
-func isLine(xfrom int,yfrom int,xto int,yto int) bool {
-  var s1 Pixel
-  var s2 Pixel
-  var same bool
-
-  s1=pix(xfrom,yfrom)
-  same=true
-  if xfrom==xto {
-    for y:=yfrom;y<yto;y++ {
-      s2=pix(xfrom,y)
-      //fmt.Println("GOT",xfrom,y," ",s1.R,s2.R," ",s1.G,s2.G," ",s1.B,s2.B)
-      if s2.R != s1.R || s2.G != s1.G || s2.B != s1.B {
-        same=false
-      }
-    }
-  } else {
-    if yfrom==yto {
-      for x:=xfrom;x<xto;x++ {
-        s2=pix(x,yfrom)
-        //fmt.Println("GOT",x,yfrom," ",s1.R,s2.R," ",s1.G,s2.G," ",s1.B,s2.B)
-        if s2.R != s1.R || s2.G != s1.G || s2.B != s1.B {
-          same=false
-        }
-      }
-    } else {
-      // not supported, diagonal lines
-      fmt.Println("Warning: matchine diagonal lines")
-      return false
-    }
-  }
-  return same
-}
-
-func like(s1 Pixel,r int,g int,b int, div int) bool {
-  if div<1 {
-    div=1
-  }
-  if int(s1.R/div) == r && int(s1.G/div) == g && int(s1.B/div) == b  {
-    return true
-  }
-  return false
-}
-
-func holes(xt int,yt int,xb int,tr int) int {
-  hole:=false
-  cnt:=0
-  for x:=xt;x<xb;x++ {
-    if isAbove(x,yt,tr) {
-      if hole {
-        cnt++
-      }
-      hole=false
-    } else {
-      hole=true
-    }
-  }
-  return cnt
 }
 
 // ----------------------------------------------------------------------------
@@ -518,12 +316,6 @@ func getScreen() {
   game.screen=guessScreen()
 }
 
-
-
-// ============================================================================
-// In game statistics screen (when pressing TAB)
-// ============================================================================
-
 // ----------------------------------------------------------------------------
 // get received medals, returns gold,silver,bronze or "-"
 
@@ -545,7 +337,7 @@ func getMedal(pos int) string {
   if (pos>2) {
     y=mypos[1]
   }
-  if config.screen {
+  if config.dbg_screen {
     fmt.Println("GETMEDAL Got Pix:",pix(x,y).R,pix(x,y).G,pix(x,y).B)
   }
   if (pix(x,y).R>89) {
@@ -662,7 +454,7 @@ func guessHero(col int, row int) string {
     inl=pix(xpos[col],ypenemy[0])
     inh=pix(xpos[col],ypenemy[1])
   }
-  if config.screen {
+  if config.dbg_screen {
     fmt.Println("GUESSHERO: Got pix ",inl,inh)
   }
 
@@ -691,7 +483,7 @@ func guessHero(col int, row int) string {
         score=tot
         found=el.name
       }
-      if config.screen {
+      if config.dbg_screen {
         fmt.Println("GUESSHERO: Checked ",el.name," score=",tot," dev=",dev)
       }
   }
@@ -747,28 +539,6 @@ func getGroups() {
 }
 
 // ----------------------------------------------------------------------------
-// Load image using given filename (must be .png file)
-func loadFile(name string) {
-    file, err := os.Open(name)
-
-    if err != nil {
-        fmt.Println("Error: File could not be opened")
-        os.Exit(1)
-    }
-
-    defer file.Close()
-    myimg, err := png.Decode(file)
-
-    if err != nil {
-      fmt.Println("Error: PNG could not be decoded")
-      os.Exit(4)
-    }
-    img=myimg.(*image.RGBA)
-    setRes()
-}
-
-
-// ----------------------------------------------------------------------------
 // get SR numbers from "overview"  screen
 func getCurrentSR() {
   game.currentSR=owocr.Img2CurrentSR(img,res)
@@ -791,38 +561,6 @@ func getCompSR() {
 // get statistic string
 func getStats(col int, row int) string {
   return owocr.GetStats(img,col,row,res)
-}
-
-// ----------------------------------------------------------------------------
-// Clear screen for console output
-
-func cls() {
-  cmd := exec.Command("cmd", "/c", "clear")
-  cmd.Stdout = os.Stdout
-  cmd.Run()
-}
-
-
-// ----------------------------------------------------------------------------
-// Print medal in appropiate color
-
-func printMedal(m string) {
-  switch m {
-    case "G":
-      color.Set(color.FgYellow)
-      fmt.Print("(G)")
-      color.Set(color.FgWhite)
-    case "S":
-      color.Set(color.FgHiWhite)
-      fmt.Print("(S)")
-      color.Set(color.FgWhite)
-    case "B":
-      color.Set(color.FgRed)
-      fmt.Print("(B)")
-      color.Set(color.FgWhite)
-    default:
-      fmt.Print("( )")
-  }
 }
 
 // ----------------------------------------------------------------------------
@@ -869,112 +607,6 @@ func parseTabStats() {
   getGroups()
 }
 
-// ----------------------------------------------------------------------------
-// Draws window with information
-func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectangle) error {
-  bounds := mw.paintWidget.ClientBounds()
-
-  // Color background black
-  blackBrush,err:=walk.NewSolidColorBrush(walk.RGB(0,0,0))
-  if err != nil {
-    return err
-  }
-  defer blackBrush.Dispose()
-  canvas.FillRectangle(blackBrush,bounds)
-
-
-  return nil
-}
-
-// ----------------------------------------------------------------------------
-// Dump statistics on console
-
-func dumpTabStats() {
-    cls()
-    fmt.Println()
-    fmt.Print("             ")
-    color.Set(color.FgWhite,color.Bold)
-    fmt.Print(game.mapname)
-    color.Set(color.FgWhite)
-    fmt.Print(" | ")
-    color.Set(color.FgYellow,color.Bold)
-    fmt.Println(game.gametype)
-    color.Unset()
-    color.Set(color.FgHiBlue,color.Underline)
-    fmt.Println("                                                                                ")
-    color.Unset()
-    fmt.Println()
-    for x := 0; x < 6; x++ {
-      if game.enemy.groupid[x]>0 {
-        color.Set(color.FgHiWhite)
-      }
-      fmt.Printf(" %-10s",guessHero(x,0))
-      if x<5 && game.enemy.groupid[x] >0 && game.enemy.groupid[x] == game.enemy.groupid[x+1] {
-        fmt.Print(" - ");
-      } else {
-        fmt.Print("   ");
-      }
-      color.Unset()
-    }
-    fmt.Println()
-    fmt.Println()
-    color.HiBlue("-------------------------------------= V S =------------------------------------")
-    fmt.Println()
-    for x := 0; x < 6; x++ {
-      if game.own.groupid[0]==1 && game.own.groupid[x]==1 {
-        color.Set(color.FgHiGreen)
-      } else {
-        if game.own.groupid[x]>0 {
-          color.Set(color.FgHiWhite)
-        } else {
-          color.Set(color.FgWhite)
-        }
-      }
-      fmt.Printf(" %-10s",guessHero(x,1))
-      if x<5 && game.own.groupid[x] >0 && game.own.groupid[x] == game.own.groupid[x+1] {
-        fmt.Print(" - ")
-      } else {
-        fmt.Print("   ")
-      }
-      color.Unset()
-    }
-    fmt.Println()
-    color.Set(color.FgHiBlue,color.Underline)
-    fmt.Println("                                                                                ")
-    color.Unset()
-    fmt.Println()
-    fmt.Print(" Eliminations     ")
-    printMedal(getMedal(0))
-    fmt.Printf(":%8s\n",getStats(0,0))
-    fmt.Print(" Objective kills  ")
-    printMedal(getMedal(1))
-    fmt.Printf(":%8s\n",getStats(1,0))
-    fmt.Print(" Objective time   ")
-    printMedal(getMedal(2))
-    fmt.Printf(":%8s\n",getStats(2,0))
-    fmt.Print(" Hero Damage Done ")
-    printMedal(getMedal(3))
-    fmt.Printf(":%8s\n",getStats(0,1))
-    fmt.Print(" Healing Done     ")
-    printMedal(getMedal(4))
-    fmt.Printf(":%8s\n",getStats(1,1))
-    fmt.Print(" Deaths              ")
-    fmt.Printf(":%8s\n",getStats(2,1))
-    color.Set(color.FgHiBlue,color.Underline)
-    fmt.Println("                                                                                ")
-    fmt.Println()
-    color.Unset()
-    fmt.Println(" Stat 1: ",getStats(3,0))
-    fmt.Println(" Stat 2: ",getStats(4,0))
-    fmt.Println(" Stat 3: ",getStats(5,0))
-    fmt.Println(" stat 4: ",getStats(3,1))
-    fmt.Println(" stat 5: ",getStats(4,1))
-    fmt.Println(" stat 6: ",getStats(5,1))
-    color.Set(color.FgHiBlue,color.Underline)
-    fmt.Println("                                                                                ")
-    color.Unset()
-    fmt.Println()
-}
 // ----------------------------------------------------------------------------
 // Get statistics of Assemble screen
 func parseAssembleScreen() {
@@ -1028,7 +660,6 @@ func initGameInfo() {
   game.gametype=""
   game.hero=""
   game.result=""
-  game.side=""
   game.enemy.isChanged=false
   game.own.isChanged=false
   game.stats.eleminations=0
@@ -1055,117 +686,80 @@ func interpret() {
   switch game.screen {
     case SC_UNKNOWN:
       // just ignore
+
     case SC_MAIN:
       if game.pscreen!=game.screen {
         initGameInfo()
-        fmt.Println("Main screen",game.side)
+        dbgWindow("Main screen")
+        game.state=GS_NONE
+        game.side=""
       }
     case SC_ASSEMBLE:
-      parseAssembleScreen()
-      if game.pscreen!=game.screen {
-        fmt.Println("Assemble team, we are on",game.side)
+      if game.state!=GS_END||game.image {
+        parseAssembleScreen()
+        if game.pscreen!=game.screen {
+          dbgWindow("Assemble team, we are on "+game.side)
+          game.state=GS_START
+        }
       }
     case SC_TAB:
+      game.state=GS_RUN
       parseTabStats()
-      dumpTabStats()
+      if config.dbg_screen {
+        dumpTabStats()
+      }
     case SC_VICTORY:
-      if game.pscreen!=game.screen {
-        fmt.Println("Victory!")
+      if game.state==GS_RUN||game.image {
+        dbgWindow("Victory!")
+        game.state=GS_END
       }
     case SC_DEFEAT:
-      if game.pscreen!=game.screen {
-        fmt.Println("Defeat!")
+      if game.state==GS_RUN||game.image {
+        dbgWindow("Defeat!")
+        game.state=GS_END
       }
     case SC_ENDING:
+      game.state=GS_END
       parseEndScreen()
       if game.pscreen!=game.screen {
-        fmt.Println("Ending:",game.result)
+        dbgWindow("End result: "+game.result)
       }
     case SC_OVERVIEW:
       if game.pscreen!=game.screen {
         getCurrentSR()
         getHighSR()
-        fmt.Println("SR Current    :",game.currentSR)
-        fmt.Println("SR Season High:",game.highestSR)
+        dbgWindow("SR Current    : "+strconv.Itoa(game.currentSR))
+        dbgWindow("SR Season High: "+strconv.Itoa(game.highestSR))
       }
     case SC_SRGAIN:
       getCompSR()
-      fmt.Println("SR Current    :",game.currentSR)
+      dbgWindow("SR Current : "+strconv.Itoa(game.currentSR))
     default:
-      fmt.Println("Detected unknown screen type:",game.screen)
+      dbgWindow("Detected unknown screen type: "+strconv.Itoa(game.screen))
   }
 }
 
 // ----------------------------------------------------------------------------
-// Read "owig.ini" file
-
-func getIni() {
-  config.sleep=1000
-  config.stats="owig_stats.csv"
-  config.divider=","
-  config.header=true
-  config.screen=false
-  config.ocr=false
-  config.pause=2000
-
-  wd,_:=os.Getwd();
-  // Try working directory
-  inifile:=wd+"\\owig.ini"
-  cfg,err := ini.InsensitiveLoad(inifile)
-  if err != nil {
-    // Try directory .exe is located
-    bd:=filepath.Dir(os.Args[0])
-    inifile2:=bd+"\\owig.ini"
-    cfg,err = ini.InsensitiveLoad(inifile2)
-    fmt.Println("Warning: can't read inifile ",inifile," or ",inifile2)
-    return
-  }
-  // Got INI file, so lets read it //
-  if cfg.Section("main").HasKey("sleep") {
-    config.sleep,_=cfg.Section("main").Key("sleep").Int()
-  }
-  if cfg.Section("output").HasKey("stats") {
-    config.stats=cfg.Section("output").Key("stats").String()
-  }
-  if cfg.Section("output").HasKey("divider") {
-    config.divider=cfg.Section("output").Key("divider").String()
-  }
-  if cfg.Section("output").HasKey("header") {
-    config.header,_=cfg.Section("output").Key("header").Bool()
-  }
-  if cfg.Section("debug").HasKey("screen") {
-    config.screen,_=cfg.Section("debug").Key("screen").Bool()
-  }
-  if cfg.Section("debug").HasKey("ocr") {
-    config.ocr,_=cfg.Section("debug").Key("ocr").Bool()
-  }
-  if cfg.Section("debug").HasKey("pause") {
-    config.pause,_=cfg.Section("debug").Key("pause").Int()
-  }
-  // Set appropiate values, if needed
-  if config.ocr {
-    owocr.Debug=true
-  }
-}
+// Mainloop with own thread
 
 func mainLoop() {
-  getIni()
-  initGameInfo()
   if (len(os.Args)>1) {
+    game.image=true
     // testing, debug with screenshots
     for a:=1;a<len(os.Args);a++ {
-      initGameInfo()
       loadFile(os.Args[a])
       interpret()
-      fmt.Println("File: ",os.Args[a])
+      //fmt.Println("File: ",os.Args[a])
+      dbgWindow("Reading File: "+os.Args[a])
       if (a+1<len(os.Args)) {
-        time.Sleep(time.Duration(config.pause) * time.Millisecond)
+        time.Sleep(time.Duration(config.dbg_pause) * time.Millisecond)
       }
     }
     for {
       // wait till window is closed
     }
   } else {
+    game.image=false
     for {
       grabScreen()
       interpret()
@@ -1175,6 +769,9 @@ func mainLoop() {
 }
 
 func main() {
+  getIni()
+  initGameInfo()
+
   go mainLoop()
 
   mw:= new(MyMainWindow)
@@ -1182,9 +779,10 @@ func main() {
   icon,_ := walk.NewIconFromFile("owig256.ico")
 
   MainWindow{
+    AssignTo: &mainWindow,
     Title:   "OWIG",
     Icon: icon,
-    MinSize:    Size{600, 400},
+    MinSize:    Size{600, 500},
     Layout:  VBox{MarginsZero:true},
     Children: []Widget{
       CustomWidget{
