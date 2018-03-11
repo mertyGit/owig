@@ -13,6 +13,8 @@ import (
   "strconv"
 )
 
+//Version of program
+const VERSION = "Version 0.8"
 //Windows window struct
 type MyMainWindow struct {
   *walk.MainWindow
@@ -21,6 +23,8 @@ type MyMainWindow struct {
 var mainCanvas *walk.Canvas
 var mainRect walk.Rectangle
 var mainWindow *walk.MainWindow
+
+var heroStats map[string][]string
 
 
 // Pixel struct 
@@ -58,21 +62,25 @@ const GS_END        = 4  // Game Ended, showing results, stats are final
 // ----------------------------------------------------------------------------
 // Global variable to hold every information about the game thats is being played
 type GameInfo struct {
-  screen      int    // Found screen type (tab screen, overview screen etc.etc.)
-  pscreen     int    // Previous screen type 
-  mapname  string    // Name of map we are playing, like "ILIOS" 
-  gametype string    // Game type, like "MYSTERY HEROES"  or "QUICK PLAY"
-  hero     string    // What the hero is playing at the moment = own.heroes[0]
-  enemy  TeamComp    // Enemy team composition (see below)
-  own    TeamComp    // Enemy team composition (see below)
-  stats  OwnStats    // Own statistics
-  currentSR   int
-  highestSR   int
-  result   string    // End result (won,lost,draw)
-  side     string    // attack or defend
-  dmsg     [4]string // debug messages
-  state       int    // state
-  image      bool    // are we using images instead of screenshots ?
+  screen       int   // Found screen type (tab screen, overview screen etc.etc.)
+  pscreen      int   // Previous screen type 
+  mapname   string   // Name of map we are playing, like "ILIOS" 
+  gametype  string   // Game type, like "MYSTERY HEROES"  or "QUICK PLAY"
+  hero      string   // What the hero is playing at the moment = own.heroes[0]
+  enemy   TeamComp   // Enemy team composition (see below)
+  own     TeamComp   // Enemy team composition (see below)
+  stats   OwnStats   // Own statistics
+  currentSR    int
+  highestSR    int
+  result    string   // End result (won,lost,draw)
+  side      string   // attack or defend
+  dmsg   [4]string   // debug messages
+  state        int   // state
+  image       bool   // are we using images instead of screenshots ?
+  medals [6]string   // Medals for common statistics
+  lstats [6]string   // Common statistics (left bottom on TAB screen)
+  rstats [6]string   // Special statistics (right bottom on TAB screen)
+  snames [6]string   // Name of statistics field
 }
 
 type OwnStats struct {
@@ -605,6 +613,17 @@ func parseTabStats() {
 
   // Get group composition
   getGroups()
+
+  // Get statistics & medals
+  for i:=0;i<6;i++ {
+    row:=0
+    if (i>2) {
+      row=1
+    }
+    game.lstats[i]=getStats(i%3,row)
+    game.rstats[i]=getStats(i%3+3,row)
+    game.medals[i]=getMedal(i)
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -675,6 +694,9 @@ func initGameInfo() {
     game.enemy.hero[i]=""
     game.enemy.groupid[i]=0
     game.enemy.switches[i]=0
+    game.lstats[i]=""
+    game.rstats[i]=""
+    game.medals[i]=""
   }
 }
 
@@ -696,17 +718,18 @@ func interpret() {
       }
     case SC_ASSEMBLE:
       if game.state!=GS_END||game.image {
-        parseAssembleScreen()
         if game.pscreen!=game.screen {
-          dbgWindow("Assemble team, we are on "+game.side)
+          dbgWindow("Assemble team detected")
           game.state=GS_START
         }
+        parseAssembleScreen()
       }
     case SC_TAB:
       game.state=GS_RUN
       parseTabStats()
       if config.dbg_screen {
         dumpTabStats()
+        dbgWindow("Tab statistics read")
       }
     case SC_VICTORY:
       if game.state==GS_RUN||game.image {
@@ -756,22 +779,256 @@ func mainLoop() {
       }
     }
     for {
-      // wait till window is closed
+      time.Sleep(time.Duration(config.dbg_pause) * time.Millisecond)
     }
   } else {
     game.image=false
     for {
       grabScreen()
       interpret()
+      mainWindow.Invalidate()
       time.Sleep(time.Duration(config.sleep) * time.Millisecond)
     }
   }
 }
 
-func main() {
+func initOwig() {
   getIni()
   initGameInfo()
+  loadIcons()
+  heroStats=map[string][]string{
+    "Ana":{
+       "Unscoped Accuracy",
+       "Scoped Accuracy",
+       "Defensive Assists",
+       "Nano Boost Assists",
+       "Enemies Slept",
+       "",
+    },
+    "Bastion":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Recon Kills",
+       "Sentry Kills",
+       "Tank Kills",
+       "Self Healing",
+    },
+    "Brigitte":{
+       "Offensive Assists",
+       "Defensive Assists",
+       "Damage Blocked",
+       "Armor Provided",
+       "",
+       "",
+       "",
+    },
+    "Doomfist":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Ability Damage Done",
+       "Meteor Strike Kill",
+       "Shields Created",
+    },
+    "D.Va":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Damage Blocked",
+       "Self-Destruct Kills",
+       "Mechs Called",
+       "",
+    },
+    "Genji":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Damage Reflected",
+       "Dragonblade Kills",
+       "",
+    },
+    "Hanzo":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Damage Reflected",
+       "Critical Hits",
+       "Recon Assists",
+       "Dragonstrike Kills",
+    },
+    "Junkrat":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Enemies Trapped",
+       "Rip-Tire Kills",
+       "",
+    },
+    "Lucio":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Sound Barriers Provided",
+       "Offensive Assists",
+       "Defensive Assists",
+       "",
+    },
+    "McCree":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Critical Hits",
+       "Deadeye Kills",
+       "Fan The Hammer Kill",
+    },
+    "Mei":{
+       "Damage Blocked",
+       "Kill Streak - Best",
+       "Enemies Frozen",
+       "Blizzard Kills",
+       "Self Healing",
+       "",
+    },
+    "Mercy":{
+       "Offensive Assists",
+       "Defense Assists",
+       "Player Resurrected",
+       "Blaster Kills",
+       "",
+       "",
+    },
+    "Moira":{
+       "Secondary Fire Accuracy",
+       "Kill Streak - Best",
+       "Defensive Assists",
+       "Coalescence Kills",
+       "Coalescence Healing",
+       "Self Healing",
+    },
+    "Orisa":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Damage Blocked",
+       "Offensive Assists",
+       "Damage Amplified",
+       "",
+    },
+    "Pharah":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Barrage Kill",
+       "Rocket Direct Hits",
+       "",
+    },
+    "Reaper":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Death Blossom Kills",
+       "Self Healing",
+       "",
+    },
+    "Reinhardt":{
+       "Damage Blocked",
+       "Kill Streak - Best",
+       "Charge Kills",
+       "Fire Strike Kills",
+       "Earthshatter Kills",
+       "",
+    },
+    "Roadhog":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Enemies Hooked",
+       "Hook Accuracy",
+       "Self Healing",
+       "Whole Hog Kills",
+    },
+    "Soldier 76":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Helix Rockets Kills",
+       "Tactical Visor Kills",
+       "",
+    },
+    "Sombra":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Offensive Assists",
+       "Enemies Hacked",
+       "Enemies EMP'D",
+       "",
+    },
+    "Symmetra":{
+       "Sentry Turret Kills",
+       "Kill Streak - Best",
+       "Damage Blocked",
+       "Players Teleported",
+       "Teleporter Uptime - Average",
+       "",
+    },
+    "Torbjorn":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Torbjorn Kills",
+       "Turret Kills",
+       "Molten Core Kills",
+       "Armor Packs Created",
+    },
+    "Tracer":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Pulse Bomb kills",
+       "Pulse Bombs Attached",
+       "",
+    },
+    "Widowmaker":{
+       "Scoped Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Scoped Critical Hits",
+       "Recon Assists",
+       "",
+    },
+    "Winston":{
+       "Damage Blocked",
+       "Kill Streak - Best",
+       "Melee Kill",
+       "Players Knocked Back",
+       "",
+       "",
+    },
+    "Zarya":{
+       "Damage Blocked",
+       "Kill Streak - Best",
+       "High Energy Kills",
+       "Average Energy",
+       "Graviton Surge Kills",
+       "",
+    },
+    "Zenyatta":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Offensive Assists",
+       "Defense Assists",
+       "Best Transcendence Heal",
+       "",
+    },
+  }
+}
 
+func getStatsline(hero string, i int) string {
+  lines,ok:=heroStats[hero]
+  if ok {
+    return lines[i]
+  } else {
+    return ""
+  }
+}
+
+func main() {
+  initOwig()
   go mainLoop()
 
   mw:= new(MyMainWindow)
