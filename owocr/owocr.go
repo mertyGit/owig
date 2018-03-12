@@ -362,7 +362,7 @@ func Img2Time(img *image.RGBA,res int) string {
       setImg(img,100,55,160,68)
   }
   line:=ReadTime(res)
-  SaveFile("test.png")
+  //SaveFile("test.png")
   return line
 }
 
