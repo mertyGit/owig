@@ -81,6 +81,7 @@ type GameInfo struct {
   lstats [6]string   // Common statistics (left bottom on TAB screen)
   rstats [6]string   // Special statistics (right bottom on TAB screen)
   snames [6]string   // Name of statistics field
+  time      string   // Timeindicator during game
 }
 
 type OwnStats struct {
@@ -584,6 +585,9 @@ func parseTabStats() {
     game.gametype=strings.Split(line,"|")[1]
   }
 
+  // Get Time
+  game.time=owocr.Img2Time(img,res)
+
   // Get hero composition
   game.enemy.isChanged=false
   for x := 0; x < 6; x++ {
@@ -687,6 +691,7 @@ func initGameInfo() {
   game.stats.objectiveSecs=0
   game.stats.damage=0
   game.stats.deaths=0
+  game.time=""
   for i:=0;i<6;i++ {
     game.stats.medals[i]=""
     game.stats.stats[i]=""
@@ -719,18 +724,22 @@ func interpret() {
     case SC_ASSEMBLE:
       if game.state!=GS_END||game.image {
         if game.pscreen!=game.screen {
-          dbgWindow("Assemble team detected")
           game.state=GS_START
         }
+        dbgWindow("Assemble team detected "+game.side)
         parseAssembleScreen()
       }
     case SC_TAB:
-      game.state=GS_RUN
       parseTabStats()
+      if game.time=="0:00" {
+        game.state=GS_START
+      } else {
+        game.state=GS_RUN
+      }
       if config.dbg_screen {
         dumpTabStats()
-        dbgWindow("Tab statistics read")
       }
+      dbgWindow("Tab statistics read")
     case SC_VICTORY:
       if game.state==GS_RUN||game.image {
         dbgWindow("Victory!")

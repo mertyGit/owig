@@ -354,6 +354,18 @@ func Img2Title(img *image.RGBA,res int) string {
   return line
 }
 
+func Img2Time(img *image.RGBA,res int) string {
+  switch res {
+    case 0:
+      setImg(img,200,110,320,136)
+    case 1:
+      setImg(img,100,55,160,68)
+  }
+  line:=ReadTime(res)
+  SaveFile("test.png")
+  return line
+}
+
 
 func Img2CurrentSR(img *image.RGBA,res int) int {
   switch res {
@@ -495,6 +507,45 @@ func ReadSR(res int,size int) string{
   line=strings.Replace(line,".","",-1) // get rid of artifacts
   line=strings.Replace(line,"?","",-1) // get rid of artifacts
   //fmt.Println("Got line:",line)
+  return line
+}
+
+func ReadTime(res int) string{
+  var line=""
+  var ccnt=1
+  var font map[string][][]int
+
+  switch res {
+    case 0:
+      font=owfonts.FontTime4K
+    case 1:
+      font=owfonts.FontTime1080
+  }
+
+  blackOut()
+  for xi := 0; xi < width; xi++ {
+    for yi := 0; yi < height; yi++ {
+      thresshold=130
+      if isPixIn(xi,yi) && !isPixOut(xi,yi) {
+        //fmt.Println("Reading char #: ",ccnt)
+
+        //Intepret character from TimeFont
+        ch,_:=getChar(xi,yi,font)
+        //fmt.Println(">> ",ch)
+        line+=ch
+        ccnt++
+      }
+    }
+  }
+  // place ":" back, if it is dropped out during scanning fase 
+  // (to low res sees it as artifacts)
+  if res==1 && !strings.Contains(line,":") {
+    line=line[0:len(line)-2]+":"+line[len(line)-2:]
+  }
+  line=strings.Replace(line,"..",":",-1) // replace .. to ":"
+  line=strings.Replace(line,"?","",-1) // get rid of any artifacts
+  //fmt.Println("Got Time:",line)
+  thresshold=150
   return line
 }
 

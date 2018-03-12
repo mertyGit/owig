@@ -126,22 +126,28 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
 
 
   if game.state==GS_RUN||game.state==GS_END {
+    // Color background
     for x:=0;x<bounds.Width;x+=1000 {
       canvas.DrawImage(redflair, walk.Point{x,30})
       canvas.DrawImage(blueflair, walk.Point{x,120})
     }
 
-
+    // Headlines on top
     rbounds.X=10
     rbounds.Y=10
     rbounds.Width=bounds.Width-10
     rbounds.Height=20
     canvas.DrawText(game.mapname,tfont,walk.RGB(212,212,212),rbounds, 0)
     rbounds.Width=200
+
     fbounds,_,_:=canvas.MeasureText(game.mapname,tfont,rbounds, 0)
     rbounds.X=10+fbounds.Width+10
     canvas.DrawText(game.gametype,tfont,walk.RGB(212,212,0),rbounds, 0)
     fbounds,_,_=canvas.MeasureText(game.gametype,tfont,rbounds, 0)
+
+    rbounds.X=bounds.Width-80
+    canvas.DrawText(game.time,tfont,walk.RGB(212,212,212),rbounds, 0)
+
     rbounds.X=fbounds.X+fbounds.Width+10
     rbounds.Y+=2
     if game.side=="attack" {
@@ -151,6 +157,7 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
         canvas.DrawText("Defense",tifont,walk.RGB(100,100,212),rbounds, 0)
       }
     }
+
 
 
     // Display icons, borders and grouping of known players
@@ -217,7 +224,7 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
     canvas.DrawLine(DGPen,walk.Point{0,bounds.Height-51},walk.Point{bounds.Width,bounds.Height-51})
     canvas.DrawLine(DGPen,walk.Point{0,bounds.Height-50},walk.Point{bounds.Width,bounds.Height-50})
 
-  // Display common statistics 
+    // Display common statistics 
     sfont, err := walk.NewFont("Abadi MT Condensed Light", 10, 0)
     if err != nil {
       return err
