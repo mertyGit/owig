@@ -3,10 +3,27 @@ package main
 import (
   "fmt"
   "os"
-  "github.com/mertyGit/owig/owocr"
   "path/filepath"
   "github.com/go-ini/ini"
 )
+// ----------------------------------------------------------------------------
+// Configuration struct
+
+type Ini struct {
+  sleep int
+  stats string
+  divider string
+  header bool
+  dbg_screen bool
+  dbg_window bool
+  dbg_ocr bool
+  dbg_pause int
+  dbg_time  bool
+}
+
+var config Ini
+
+
 
 // ----------------------------------------------------------------------------
 // Read "owig.ini" file
@@ -21,6 +38,7 @@ func getIni() {
   config.dbg_screen=false
   config.dbg_window=false
   config.dbg_ocr=false
+  config.dbg_time=false
   config.dbg_pause=2000
 
   wd,_:=os.Getwd();
@@ -54,17 +72,15 @@ func getIni() {
   if cfg.Section("debug").HasKey("window") {
     config.dbg_window,_=cfg.Section("debug").Key("window").Bool()
   }
+  if cfg.Section("debug").HasKey("time") {
+    config.dbg_time,_=cfg.Section("debug").Key("time").Bool()
+  }
   if cfg.Section("debug").HasKey("ocr") {
     config.dbg_ocr,_=cfg.Section("debug").Key("ocr").Bool()
   }
   if cfg.Section("debug").HasKey("pause") {
     config.dbg_pause,_=cfg.Section("debug").Key("pause").Int()
   }
-  // Set appropiate values, if needed
-  if config.dbg_ocr {
-    owocr.Debug=true
-  }
-
   // Initialize vars program startup here
   game.dmsg[0]=""
   game.dmsg[1]=""

@@ -125,7 +125,7 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
   }
 
 
-  if game.state==GS_RUN||game.state==GS_END {
+  if game.state==GS_START || game.state==GS_RUN||game.state==GS_END {
     // Color background
     for x:=0;x<bounds.Width;x+=1000 {
       canvas.DrawImage(redflair, walk.Point{x,30})
@@ -140,7 +140,8 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
     canvas.DrawText(game.mapname,tfont,walk.RGB(212,212,212),rbounds, 0)
     rbounds.Width=200
 
-    fbounds,_,_:=canvas.MeasureText(game.mapname,tfont,rbounds, 0)
+    // BugFix: Walk.TextCalcRec added, otherwise width will not be returned
+    fbounds,_,_:=canvas.MeasureText(game.mapname,tfont,rbounds, walk.TextCalcRect)
     rbounds.X=10+fbounds.Width+10
     canvas.DrawText(game.gametype,tfont,walk.RGB(212,212,0),rbounds, 0)
     fbounds,_,_=canvas.MeasureText(game.gametype,tfont,rbounds, 0)
