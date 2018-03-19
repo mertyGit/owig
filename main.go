@@ -107,11 +107,6 @@ var game GameInfo
 
 var owig *OWImg
 
-func ts(id string) {
-  if config.dbg_time {
-    fmt.Println("TIME:",time.Now().UnixNano()/1000000 - game.ts,id)
-  }
-}
 
 // ----------------------------------------------------------------------------
 // Try to figure out what screenshot is
@@ -1126,16 +1121,6 @@ func initOwig() {
     },
   }
 }
-
-func getStatsline(hero string, i int) string {
-  lines,ok:=heroStats[hero]
-  if ok {
-    return lines[i]
-  } else {
-    return ""
-  }
-}
-
 
 func main() {
   owig=new(OWImg)
