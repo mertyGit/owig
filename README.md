@@ -37,7 +37,7 @@ In short, it takes a screenshot like this:
 
 And tries to decrypt the information writes it to disk and to the Windows GUI screen: 
 
-![Example processing](https://raw.githubusercontent.com/mertyGit/owig/master/doc/example.png)
+![Example processing](https://raw.githubusercontent.com/mertyGit/owig/master/doc/example.png | width=100)
 
 # Features
 
