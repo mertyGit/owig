@@ -11,7 +11,7 @@ import (
 )
 
 //Version of program
-const VERSION = "Version 0.81"
+const VERSION = "Version 0.82"
 
 //Windows window struct
 type MyMainWindow struct {
@@ -65,7 +65,8 @@ type GameInfo struct {
   pscreen      int   // Previous screen type 
   mapname   string   // Name of map we are playing, like "ILIOS" 
   gametype  string   // Game type, like "MYSTERY HEROES"  or "QUICK PLAY"
-  hero      string   // What the hero is playing at the moment = own.heroes[0]
+  hero      string   // What the hero is playing at the moment 
+  group        int   // Group ID of player
   enemy   TeamComp   // Enemy team composition (see below)
   own     TeamComp   // Enemy team composition (see below)
   stats   OwnStats   // Own statistics
@@ -81,7 +82,7 @@ type GameInfo struct {
   rstats [6]string   // Special statistics (right bottom on TAB screen)
   snames [6]string   // Name of statistics field
   time      string   // Timeindicator during game
-  ts        int64   // Timestamp since start
+  ts        int64    // Timestamp since start
 }
 
 type OwnStats struct {
@@ -551,6 +552,12 @@ func getGroups() {
       }
     }
   }
+  // Figure out own group id my name of choosen hero
+  for x:=5;x>-1;x-- {
+    if game.own.hero[x]==game.hero {
+      game.group=game.own.groupid[x]
+    }
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -641,6 +648,12 @@ func parseTabStats() {
     //fmt.Println("Objective=",guessCompObjective())
   }
 
+  // Get own played hero, (not always the one on left bottom of composition)
+  h:=owig.MyHero()
+  if !(h=="") {
+    game.hero=h
+  }
+
 
   // Get hero composition
   game.enemy.isChanged=false
@@ -662,9 +675,6 @@ func parseTabStats() {
         game.own.hero[x]=h
         game.own.isChanged=true
         game.own.switches[x]++
-      }
-      if x==0 {
-        game.hero=h
       }
     }
   }

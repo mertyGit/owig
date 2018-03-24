@@ -75,14 +75,18 @@ func (g *OWImg) getChar(font map[string][][]int) (string,int,int) {
       }
       bitc++
       if bitc>7 {
-        font["search"][y-by][bytec]=oct
+        if y-by > -1 && y-by < h && bytec < w {
+          font["search"][y-by][bytec]=oct
+        }
         bitc=0
         bytec++
         oct=0
       }
     }
     if bitc>0 {
-      font["search"][y-by][bytec]=oct
+      if y-by > -1 && y-by < h && bytec < w {
+        font["search"][y-by][bytec]=oct
+      }
     }
   }
 
@@ -145,18 +149,18 @@ func (g *OWImg) getChar(font map[string][][]int) (string,int,int) {
   if config.dbg_ocr {
     for x:=bx;x<bx2;x++ {
       if !g.At(x,by).isAbove() {
-        g.Plot(Pixel{g.th-1,g.th-1,g.th-1})
+        g.Plot(Pixel{20,20,20})
       }
       if !g.At(x,by2).isAbove() {
-        g.Plot(Pixel{g.th-1,g.th-1,g.th-1})
+        g.Plot(Pixel{20,20,20})
       }
     }
     for y:=by;y<by2;y++ {
       if !g.At(bx,y).isAbove() {
-        g.Plot(Pixel{g.th-1,g.th-1,g.th-1})
+        g.Plot(Pixel{20,20,20})
       }
       if !g.At(bx2,y).isAbove() {
-        g.At(bx2,y).Plot(Pixel{g.th-1,g.th-1,g.th-1})
+        g.Plot(Pixel{20,20,20})
       }
     }
   }
@@ -518,6 +522,170 @@ func (g *OWImg) TStat(col,row int) string {
   line=strings.Replace(line,"..",":",1)  // : is intepreted as two single dots
   line=strings.Replace(line,".","",-1)   // : noise
   g.Th(-1)
+
+  return line
+}
+
+//------------------------------------------------------------
+// Read name of hero choosen by yourself
+
+func (g *OWImg) MyHero() string {
+  var line=""
+  var font map[string][][]int
+  var bx,by,bx2,by2 int
+  var ccnt=0
+  g.Th(224)
+
+  if config.dbg_screen {
+    fmt.Println("== MyHero ==")
+  }
+
+  switch g.res {
+    case SIZE_4K:
+      bx,by=1900,1660
+      bx2,by2=2400,1750
+      font=FontHero4K
+    case SIZE_1080:
+      bx,by=750,830
+      bx2,by2=1200,875
+      font=FontHero1080
+  }
+
+  for x:=0; x<bx2-bx; x++ {
+    for y:=0; y<by2-by; y++ {
+      if g.From(bx,by).To(bx2,by2).At(x,y).isAbove() {
+        if config.dbg_ocr {
+          fmt.Println(" Character # ",ccnt," at",bx+x,by+y)
+        }
+        ch,_,_:=g.getChar(font)
+        line+=ch
+        ccnt++
+      }
+    }
+  }
+  g.Th(-1)
+
+  // Quick fix to found name and name used internally
+  switch line {
+    case "ANA":
+      line="Ana"
+
+    case "BASIION":
+      line="Bastion"
+
+    case "BASTION":
+      line="Bastion"
+
+    case "BRIGITTE":
+      line="Brigitte"
+
+    case "DOOMFIST":
+      line="Doomfist"
+
+    case "D.VA":
+      line="D.Va"
+
+    case "GENJI":
+      line="Genji"
+
+    case "HANZO":
+      line="Hanzo"
+
+    case "JUNKRAT":
+      line="Junkrat"
+
+    case "JUNKRRAT":
+      line="Junkrat"
+
+    case "LU.CIO":
+      line="Lucio"
+
+    case "MGCREE":
+      line="McCree"
+
+    case "MCCREE":
+      line="McCree"
+
+    case "MEI":
+      line="Mei"
+
+    case "MERCY":
+      line="Mercy"
+
+    case "MOIRA":
+      line="Moira"
+
+    case "ORI6A":
+      line="Orisa"
+
+    case "ORISA":
+      line="Orisa"
+
+    case "PHARAH":
+      line="Pharah"
+
+    case "REAPER":
+      line="Reaper"
+
+    case "REKHHARDI":
+      line="Reinhardt"
+
+    case "REINHARDT":
+      line="Reinhardt"
+
+    case "ROAOHOG":
+      line="Roadhog"
+
+    case "ROADHOG":
+      line="Roadhog"
+
+    case "SOLDIER..76":
+      line="Soldier 76"
+
+    case "SOMBRA":
+      line="Sombra"
+
+    case "SYMMETRA":
+      line="Symmetra"
+
+    case "TOR6JO..RN":
+      line="Torbjorn"
+
+    case "TORBJO..RN":
+      line="Torbjorn"
+
+    case "TORBJORN":
+      line="Torbjorn"
+
+    case "TRACER":
+      line="Tracer"
+
+    case "WIOOWMAIRER":
+      line="Widowmaker"
+
+    case "WIDOWMAIIER":
+      line="Widowmaker"
+
+    case "WIDOWMAKER":
+      line="Widowmaker"
+
+    case "WINSTON":
+      line="Winston"
+
+    case "ZARYA":
+      line="Zarya"
+
+    case "ZENYAIIA":
+      line="Zenyatta"
+
+    case "ZENYATTA":
+      line="Zenyatta"
+  }
+
+  if config.dbg_ocr {
+    fmt.Println("got heroname:",line)
+  }
+  //g.Save("ocr.png")
 
   return line
 }

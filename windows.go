@@ -88,6 +88,13 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
     return err
   }
   defer tfont.Dispose()
+
+  hfont, err := walk.NewFont("Abadi MT Condensed Light", 12, walk.FontBold)
+  if err != nil {
+    return err
+  }
+  defer hfont.Dispose()
+
   tifont, err := walk.NewFont("Abadi MT Condensed Light", 10, walk.FontItalic)
   if err != nil {
     return err
@@ -117,7 +124,7 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
   if err != nil {
     return err
   }
-  defer LGPen.Dispose()
+  defer DGPen.Dispose()
 
   xoff:=(bounds.Width-600)/2
   if xoff < 0 {
@@ -186,7 +193,7 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
             rbounds.Y=150
             rbounds.Width=40
             rbounds.Height=40
-            if game.own.groupid[0]==game.own.groupid[i] {
+            if game.group==game.own.groupid[i] {
               canvas.DrawText("-",gfont,walk.RGB(50,212,50),rbounds, 0)
             } else {
               canvas.DrawText("-",gfont,walk.RGB(212,212,212),rbounds, 0)
@@ -300,6 +307,14 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
     }
 
   }
+
+  // Choosen Hero
+  rbounds.X=10
+  rbounds.Y=380
+  rbounds.Width=bounds.Width-10
+  rbounds.Height=20
+  canvas.DrawText(game.hero,hfont,walk.RGB(212,212,212),rbounds, 0)
+  rbounds.Width=200
 
   // Bottom part of screen
   rbounds.X=10

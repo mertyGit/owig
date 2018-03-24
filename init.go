@@ -13,6 +13,7 @@ func initGameInfo() {
   game.mapname=""
   game.gametype=""
   game.hero=""
+  game.group=0
   game.result=""
   game.enemy.isChanged=false
   game.own.isChanged=false
