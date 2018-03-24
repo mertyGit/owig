@@ -9,6 +9,9 @@ Don't use programs that are using overlays like Discord, it will mess with the r
 # Release information
 WARNING: STILL BETA Usable to track on going progress and stats, but no garantees whatsover
 
+Version 0.82: 
+- Recognizion of choosen hero in TAB screen
+
 Version 0.81: 
 - Restructuring of files and rewrite of code for using simplified methods on image struct. 
 - Rewrite and improvement of OCR code.  
