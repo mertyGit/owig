@@ -22,7 +22,7 @@ Version 0.81:
 
 
 # Bugs:
-* Wrong choice of statistic lines for own hero: When joining game as group, but leaving when in same game, your own hero position in TAB screen isn't on the left anymore..
+* ~~Wrong choice of statistic lines for own hero: When joining game as group, but leaving when in same game, your own hero position in TAB screen isn't on the left anymore..~~
 * Assembly screen isn't recognized or recognized at wrong time
 * Can't determine attack/defend on assembly screen: Algorithm uses color to find out, but in some cases "Attack" is written in blue....
 * When viewing stats of someone who has same icon, it will assume these are your stats
