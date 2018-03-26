@@ -9,6 +9,9 @@ Don't use programs that are using overlays like Discord, it will mess with the r
 # Release information
 WARNING: STILL BETA Usable to track on going progress and stats, but no garantees whatsover
 
+Version 0.90: 
+- Added CSV output functionality
+
 Version 0.82: 
 - Recognizion of choosen hero in TAB screen
 
@@ -17,7 +20,8 @@ Version 0.81:
 - Rewrite and improvement of OCR code.  
 
 # TODO:
-* Write CSV output
+* ~~Write CSV output~~
+* Using more then one .ini file (to track multiple profiles/accounts)
 * Write Excel output (?)
 * Recognision of Gaming screen to gather gamestats (score, position payload, objectives captured)
 * Card information on end of game
@@ -30,6 +34,7 @@ Version 0.81:
 * Can't determine attack/defend on assembly screen: Algorithm uses color to find out, but in some cases "Attack" is written in blue....
 * When viewing stats of someone who has same icon, it will assume these are your stats
 * Victory or Defeat message with scores under it will not be recognized
+* Crashes on missing or wrong files given at startup
 
 # More about OWIG
 OWIG is program that will gather game statics while Overwatch game is running or by feeding it screenshots

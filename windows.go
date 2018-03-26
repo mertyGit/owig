@@ -11,6 +11,17 @@ type Icons struct {
   img walk.Image
 }
 
+//Windows window struct
+type MyMainWindow struct {
+  *walk.MainWindow
+  paintWidget *walk.CustomWidget
+}
+
+var mainCanvas *walk.Canvas
+var mainRect walk.Rectangle
+var mainWindow *walk.MainWindow
+
+
 
 var heroIcons []Icons
 

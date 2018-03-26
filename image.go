@@ -40,6 +40,8 @@ type OWImg struct {
   gotat bool      // Flag to indicate we have "At"   coordinates
 }
 
+var owig *OWImg
+
 // ----------------------------------------------------------------------------
 // Initialize parameters
 func (g *OWImg) Init() {

@@ -13,19 +13,6 @@ import (
 //Version of program
 const VERSION = "Version 0.82"
 
-//Windows window struct
-type MyMainWindow struct {
-  *walk.MainWindow
-  paintWidget *walk.CustomWidget
-}
-
-var mainCanvas *walk.Canvas
-var mainRect walk.Rectangle
-var mainWindow *walk.MainWindow
-
-var heroStats map[string][]string
-
-
 type Sign struct {
   name string
   low Pixel
@@ -61,40 +48,27 @@ const GS_END        = 4  // Game Ended, showing results, stats are final
 // ----------------------------------------------------------------------------
 // Global variable to hold every info about the game thats that is being played
 type GameInfo struct {
+  ts        int64    // Timestamp since start of program
+  time      string   // Timeindicator during game
   screen       int   // Found screen type (tab screen, overview screen etc.etc.)
   pscreen      int   // Previous screen type 
+  state        int   // state
   mapname   string   // Name of map we are playing, like "ILIOS" 
   gametype  string   // Game type, like "MYSTERY HEROES"  or "QUICK PLAY"
+  side      string   // attack or defend
   hero      string   // What the hero is playing at the moment 
-  group        int   // Group ID of player
-  enemy   TeamComp   // Enemy team composition (see below)
-  own     TeamComp   // Enemy team composition (see below)
-  stats   OwnStats   // Own statistics
   currentSR    int
   highestSR    int
-  result    string   // End result (won,lost,draw)
-  side      string   // attack or defend
-  dmsg   [4]string   // debug messages
-  state        int   // state
-  image       bool   // are we using images instead of screenshots ?
   medals [6]string   // Medals for common statistics
   lstats [6]string   // Common statistics (left bottom on TAB screen)
   rstats [6]string   // Special statistics (right bottom on TAB screen)
+  group        int   // Group ID of player
+  enemy   TeamComp   // Enemy team composition (see below)
+  own     TeamComp   // Enemy team composition (see below)
+  result    string   // End result (won,lost,draw)
+  dmsg   [4]string   // debug messages
+  image       bool   // are we using images instead of screenshots ?
   snames [6]string   // Name of statistics field
-  time      string   // Timeindicator during game
-  ts        int64    // Timestamp since start
-}
-
-type OwnStats struct {
-  eleminations   int
-  objectiveKills int
-  objectiveTime  string
-  objectiveSecs  int     //objectiveTime converted to seconds
-  damage         int
-  deaths         int
-  medals         [6]string  // "G","S" or "B" 0=eleminations, 1=objective .etc.
-  stats          [6]string
-  statsText      [6]string  //meaning of stat 1..6, based on hero choice
 }
 
 type TeamComp struct {
@@ -105,8 +79,6 @@ type TeamComp struct {
 }
 
 var game GameInfo
-
-var owig *OWImg
 
 
 // ----------------------------------------------------------------------------
@@ -840,6 +812,7 @@ func mainLoop() {
       owig.Open(os.Args[a])
       ts("interpret")
       interpret()
+      wrt.Send()
       ts("sleep")
       mainWindow.Invalidate()
       dbgWindow("Reading File: "+os.Args[a])
@@ -861,6 +834,7 @@ func mainLoop() {
       owig.Capture()
       ts("interpret")
       interpret()
+      wrt.Send()
       ts("draw")
       mainWindow.Invalidate()
       ts("sleep")
@@ -871,8 +845,10 @@ func mainLoop() {
 
 func main() {
   owig=new(OWImg)
+  wrt=new(Oww)
   initOwig()
   go mainLoop()
+  go wrt.Run()
 
   mw:= new(MyMainWindow)
 
@@ -894,4 +870,3 @@ func main() {
     },
   }.Run()
 }
-
