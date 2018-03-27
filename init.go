@@ -23,6 +23,9 @@ func initGameInfo() {
     game.enemy.hero[i]=""
     game.enemy.groupid[i]=0
     game.enemy.switches[i]=0
+    game.own.hero[i]=""
+    game.own.groupid[i]=0
+    game.own.switches[i]=0
     game.lstats[i]=""
     game.rstats[i]=""
     game.medals[i]=""
