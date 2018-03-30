@@ -458,6 +458,12 @@ func (g *OWImg) TTime() string {
   //g.Save("ocr.png")
   line=strings.Replace(line,"..",":",1) // : is intepreted as two single dots
   line=strings.Replace(line,".","",-1)  // : noise
+  if !strings.Contains(line,":") || len(line)<4 {
+    // unreliable information, should have a ":" and at least x:xx format
+    // blank out to prevent any other mishap
+    line=""
+  }
+
   g.Th(-1)
 
   return line

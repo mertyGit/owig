@@ -300,7 +300,7 @@ func getScreen() {
 func getMedal(pos int) string {
   var mxpos []int
   var mypos []int
-  var medal ="( )"
+  var medal =""
 
   if config.dbg_screen {
     fmt.Println("== getMedal ==")
@@ -607,8 +607,8 @@ func parseTabStats() {
   // Get Title and Game type
   line:=owig.Title()
   if strings.Contains(line,"|") {
-    game.mapname=strings.Split(line,"|")[0]
-    game.gametype=strings.Split(line,"|")[1]
+    game.mapname=cleanMapname(strings.Split(line,"|")[0])
+    game.gametype=cleanGametype(strings.Split(line,"|")[1])
   }
   ts("parse1")
 
