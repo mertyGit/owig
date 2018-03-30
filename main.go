@@ -11,7 +11,7 @@ import (
 )
 
 //Version of program
-const VERSION = "Version 0.82"
+const VERSION = "Version 0.91"
 
 type Sign struct {
   name string
@@ -804,10 +804,23 @@ func interpret() {
 // Mainloop with own thread
 
 func mainLoop() {
-  if (len(os.Args)>1) {
+
+  // you can provide ini file as first argument and or list of png files 
+  ic:=0
+  if len(os.Args)>1 {
+    if strings.HasSuffix(os.Args[1],"png") {
+      ic=1
+    } else if len(os.Args)>2 {
+      if strings.HasSuffix(os.Args[2],"png") {
+        ic=2
+      }
+    }
+  }
+
+  if ic>0 {
     game.image=true
     // testing, debug with screenshots
-    for a:=1;a<len(os.Args);a++ {
+    for a:=ic;a<len(os.Args);a++ {
       ts("open")
       owig.Open(os.Args[a])
       ts("interpret")

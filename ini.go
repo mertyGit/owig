@@ -3,6 +3,7 @@ package main
 import (
   "fmt"
   "os"
+  "strings"
   "path/filepath"
   "github.com/go-ini/ini"
 )
@@ -29,6 +30,7 @@ var config Ini
 // Read "owig.ini" file
 
 func getIni() {
+  ifile:="owig.ini"
 
   // Fill in default values
   config.sleep=1000
@@ -42,15 +44,27 @@ func getIni() {
   config.dbg_pause=2000
 
   wd,_:=os.Getwd();
+
+  if (len(os.Args)>1)&&strings.HasSuffix(os.Args[1],"ini") {
+     // Overwrite default ini file
+     ifile=os.Args[1]
+  }
+
+
   // Try working directory
-  inifile:=wd+"\\owig.ini"
+  inifile:=wd+"\\"+ifile
   cfg,err := ini.InsensitiveLoad(inifile)
   if err != nil {
     // Try directory .exe is located
     bd:=filepath.Dir(os.Args[0])
-    inifile2:=bd+"\\owig.ini"
-    cfg,err = ini.InsensitiveLoad(inifile2)
-    fmt.Println("Warning: can't read inifile ",inifile," or ",inifile2)
+    inifile=bd+"\\"+ifile
+    cfg,err = ini.InsensitiveLoad(inifile)
+    if err != nil {
+      // Try ini file "as is"  (full path)
+      inifile=ifile
+      cfg,err = ini.InsensitiveLoad(inifile)
+      fmt.Println("Warning: can't read ini file ",inifile)
+    }
     return
   }
   // Got INI file, so lets read it //

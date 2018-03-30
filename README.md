@@ -9,6 +9,10 @@ Don't use programs that are using overlays like Discord, it will mess with the r
 # Release information
 WARNING: STILL BETA Usable to track on going progress and stats, but no garantees whatsover
 
+Version 0.91: 
+- Adjusting OCR mishaps, forcing to known mapnames and types
+- You can use other ini files, given as first argument, so per ~~smurf~~account, you can have your own statistics (and settings)
+
 Version 0.90: 
 - Added CSV output functionality
 
@@ -21,7 +25,7 @@ Version 0.81:
 
 # TODO:
 * ~~Write CSV output~~
-* Using more then one .ini file (to track multiple profiles/accounts)
+* ~~Using more then one .ini file (to track multiple profiles/accounts)~~
 * Write Excel output (?)
 * Recognision of Gaming screen to gather gamestats (score, position payload, objectives captured)
 * Card information on end of game
