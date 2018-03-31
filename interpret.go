@@ -70,17 +70,38 @@ func guessScreen() int {
   if same {
     // which one, Victory or Defeat, yellow or red ?
     if s1.R>220 && s1.G<5 {
-      if config.dbg_screen {
-        fmt.Println(" Defeat")
+      // red line, but check "T" line in DEFEAT for sure ...
+      same=false
+      switch owig.res {
+        case SIZE_4K:
+          same=owig.Box(2330,960,0,120).isLine()
+        case SIZE_1080:
+          same=owig.Box(1665,480,0,60).isLine()
       }
-      return SC_DEFEAT
+      if same {
+        if config.dbg_screen {
+          fmt.Println(" Defeat")
+        }
+        return SC_DEFEAT
+      }
     } else if s1.R>220 && s1.G>190 && int(s1.B/10)==6 {
-      return SC_VICTORY
-      if config.dbg_screen {
-        fmt.Println(" Victory")
+      // yellow line, but check "I" line in VICTORY! for sure ...
+      same=false
+      switch owig.res {
+        case SIZE_4K:
+          same=owig.Box(1500,960,0,120).isLine()
+        case SIZE_1080:
+          same=owig.Box(750,480,0,60).isLine()
+      }
+      if same {
+        if config.dbg_screen {
+          fmt.Println(" Victory")
+        }
+        return SC_VICTORY
       }
     }
   }
+
   // Victory/Defeat, but voting & medals part
   // search for blue "Leave Game" button
   switch owig.res {
