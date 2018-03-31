@@ -37,6 +37,8 @@ func cleanMapname(m string) string {
     "OINT": "WATCHPOINT: GIBRALTAR",
     "ASIS": "OASIS",
     "NAMUR": "HANAMURA",
+    "TOWN": "JUNKERTOWN",
+    "UNKER": "JUNKERTOWN",
   }
 
   return forceName(m,fl)

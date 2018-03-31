@@ -170,6 +170,153 @@ func (g *OWImg) getChar(font map[string][][]int) (string,int,int) {
 }
 
 //------------------------------------------------------------
+// Try to match pattern of screen in icon font list
+// Will get square of 50x50 (4K) or 25x25 (1080)
+
+func (g *OWImg) getPattern() (string,int) {
+  var bitc uint8
+  var bytec,oct int
+  var font map[string][][]int
+
+  bx,by:=0,0
+  bx2,by2:=0,0
+
+  if config.dbg_screen {
+    fmt.Println("== getPattern ==")
+  }
+
+  bx=g.pos.ax
+  by=g.pos.ay
+  found:="?"
+  hitscore:=0
+  highscore:=0
+  pcnt:=0
+
+  switch g.res {
+    case SIZE_4K:
+      bx2=bx+50
+      by2=by+50
+      font=Icon4K
+    case SIZE_1080:
+      bx2=bx+25
+      by2=by+25
+      font=Icon1080
+  }
+
+  w:=len(font["search"][0])
+  h:=len(font["search"])
+
+  //Place character into "search" entry of font
+  for y:=by;y<=by2;y++ {
+    bitc=0
+    bytec=0
+    oct=0
+    for x:=bx;x<=bx2;x++ {
+      if g.At(x,y).isAbove() {
+        oct|=1<<(7-bitc)
+        // Color pixel far below thresshold, to prevent rescan of pixel
+        g.Plot(Pixel{0,10,20})
+      } else {
+        g.Plot(Pixel{255,255,0})
+      }
+      bitc++
+      if bitc>7 {
+        if y-by > -1 && y-by < h && bytec < w {
+          font["search"][y-by][bytec]=oct
+        }
+        bitc=0
+        bytec++
+        oct=0
+      }
+    }
+    if bitc>0 {
+      if y-by > -1 && y-by < h && bytec < w {
+        font["search"][y-by][bytec]=oct
+      }
+    }
+  }
+
+  // Dump character (used for debug/retrieving font info)
+  if config.dbg_ocr {
+    fmt.Println("  \"?\": {")
+    for y:=0;y<h;y++ {
+      fmt.Print("    {")
+      for x:=0;x<w;x++ {
+        fmt.Print(font["search"][y][x])
+        if x<w-1 {
+          fmt.Print(",")
+        }
+      }
+      fmt.Println("},")
+    }
+    fmt.Println("  },")
+  }
+
+
+
+  // Get score for each of the found character
+  for k, v := range font {
+    if k != "search" {
+      hitscore=0
+      pcnt=0
+      for r:=0; r<h; r++ {
+        bitc=0
+        bytec=0
+        oct=0
+        for c:=0; c<w*8; c++ {
+          pcnt++
+          mask:=(1<<(7-bitc))
+          if v[r][bytec] & mask == font["search"][r][bytec] & mask {
+            hitscore++
+          } else {
+            hitscore--
+          }
+          bitc++
+          if (bitc>7) {
+            bitc=0
+            bytec++
+            oct=0
+          }
+        }
+      }
+      // make hitscore percentage of matched pixels
+      hitscore=1000*hitscore/pcnt
+      //fmt.Println(" key ",k," hitscore:",hitscore)
+      if hitscore>highscore {
+        highscore=hitscore
+        // font can have double entries for same char, denoted by trailing _
+        found=strings.Replace(k,"_","",-1)
+      }
+    }
+  }
+
+
+  // Draw box around for debugging purposes
+  if config.dbg_ocr {
+    for x:=bx;x<bx2;x++ {
+      if !g.At(x,by).isAbove() {
+        g.Plot(Pixel{20,20,20})
+      }
+      if !g.At(x,by2).isAbove() {
+        g.Plot(Pixel{20,20,20})
+      }
+    }
+    for y:=by;y<by2;y++ {
+      if !g.At(bx,y).isAbove() {
+        g.Plot(Pixel{20,20,20})
+      }
+      if !g.At(bx2,y).isAbove() {
+        g.Plot(Pixel{20,20,20})
+      }
+    }
+  }
+
+
+  //g.Save("ocr.png")
+  return found,highscore
+}
+
+//------------------------------------------------------------
 // Read map name and game type from TAB information screen
 
 func (g *OWImg) Title() string {
