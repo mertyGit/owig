@@ -214,8 +214,6 @@ func (g *OWImg) getPattern() (string,int) {
     for x:=bx;x<=bx2;x++ {
       if g.At(x,y).isAbove() {
         oct|=1<<(7-bitc)
-        // Color pixel far below thresshold, to prevent rescan of pixel
-        g.Plot(Pixel{0,10,20})
       } else {
         g.Plot(Pixel{255,255,0})
       }

@@ -54,6 +54,8 @@ func guessScreen() int {
   }
 
 
+
+
   // Victory or Defeat Screen ? 
   // Vertical image line in middle with same value
   switch owig.res {
@@ -189,6 +191,15 @@ func guessScreen() int {
     }
     return SC_ASSEMBLE
   }
+
+  // Game screen ?
+  if onFireIcon() {
+    if config.dbg_screen {
+      fmt.Println(" Game Screen")
+    }
+    return SC_GAME
+  }
+
 
   //is it a "Main screen" (screen you see after logging in)
   owig.All().Th(224)
@@ -648,6 +659,83 @@ func parseEndScreen() {
   if (crc== "72735") {
     game.result="won"
   }
+}
+
+// ----------------------------------------------------------------------------
+// Try to figure out if we have a "on fire" icon, so we are in a game
+func onFireIcon() bool {
+
+  var ystart int
+  var yend   int
+  var xstart int
+  var x,dx   int
+  var y,dy   int
+  var score  int
+  var found  string
+
+  fnd:=false
+
+
+  if config.dbg_screen {
+    fmt.Println("== onFireIcon ==")
+  }
+  switch owig.res {
+    case SIZE_4K:
+      ystart=2040
+      yend=1980
+      xstart=528
+      dx=24
+      dy=38
+    case SIZE_1080:
+      ystart=1020
+      yend=990
+      xstart=264
+      dx=12
+      dy=19
+  }
+  owig.All()
+  x=xstart
+  for y=ystart;y>yend&&!fnd;y-- {
+    if owig.At(x,y).isAbove() {
+      fnd=true
+    }
+  }
+  if !fnd {
+    return false
+  }
+  x=x-dx
+  y=y-dy
+  found,score=owig.At(x,y).getPattern()
+  //fmt.Println("FIREICON: ",found,score)
+  if (score < 800) {
+    // Try again, but this time, only for "real white", in case background
+    // is already light
+    fnd=false
+    owig.All()
+    x=xstart
+    for y=ystart;y>yend&&!fnd;y-- {
+      if owig.At(x,y).isAbove() {
+        // Make sure it is a "true" white color and
+        // filter out all other whites below
+        if owig.Red()==owig.Blue() && owig.Blue()==owig.Green() {
+          owig.Th(owig.Red()-1)
+          fnd=true
+        }
+      }
+    }
+    if !fnd {
+      return false
+    }
+    x=x-dx
+    y=y-dy
+    found,score=owig.At(x,y).getPattern()
+    //fmt.Println("FIREICON2: ",found,score)
+  }
+  owig.Th(-1)
+  if found=="FIRE" && score>800 {
+    return true
+  }
+  return false
 }
 
 
