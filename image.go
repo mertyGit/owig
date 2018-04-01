@@ -686,6 +686,21 @@ func (g *OWImg) Fill(pix Pixel) *OWImg {
   }
   return g
 }
+// ----------------------------------------------------------------------------
+// color every yellow pixel to white
+func (g *OWImg) Y2W() *OWImg {
+  if !g.gotimg || !g.gotfrom || !g.gotto  {
+    return g
+  }
+  for x:=0;x+g.pos.x<=g.pos.x2;x++ {
+    for y:=0;y+g.pos.y<=g.pos.y2;y++ {
+      if g.At(x,y).Red()>220 && g.Green()>175 && g.Blue() < g.Green(){
+        g.Plot(Pixel{255,255,255})
+      }
+    }
+  }
+  return g
+}
 
 // ----------------------------------------------------------------------------
 // Flood Fill area with color (fills all adjecent pixels > thresshold)

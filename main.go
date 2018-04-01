@@ -30,6 +30,8 @@ const SC_ASSEMBLE   = 6
 const SC_MAIN       = 7
 const SC_ENDING     = 8
 const SC_GAME       = 9
+const SC_POTG       = 10
+const SC_RESPAWN    = 11
 
 // ----------------------------------------------------------------------------
 // Constants for game state

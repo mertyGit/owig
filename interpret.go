@@ -213,6 +213,58 @@ func guessScreen() int {
     return SC_ASSEMBLE
   }
 
+  // Play Of The Game screen ?
+  owig.All()
+  switch owig.res {
+    case SIZE_4K:
+      fnd,score=owig.At(64,152).getPattern()
+    case SIZE_1080:
+      fnd,score=owig.At(32,76).getPattern()
+  }
+  //fmt.Println("POTG: ",fnd,score)
+  if fnd == "POTG" && score>900{
+    return SC_POTG
+  }
+
+  // Waiting for Respawn ?
+
+  // First, check for respawn message at "spectating" screen
+  //fmt.Println("searching respawn: ")
+  switch owig.res {
+    case SIZE_4K:
+      owig.Box(3338,134,50,50).Y2W()
+      owig.All().Th(224)
+      fnd,score=owig.At(3338,134).getPattern()
+    case SIZE_1080:
+      owig.Box(1669,67,25,25).Y2W()
+      owig.All().Th(224)
+      fnd,score=owig.At(1669,67).getPattern()
+  }
+  owig.Th(-1)
+  //fmt.Println("RESPAWN 1: ",fnd,score)
+  if fnd == "RESPAWN" && score>930 {
+    return SC_RESPAWN
+  }
+
+  // Second, check for respawn message at "kill cam" screen (higher)
+  //fmt.Println("searching respawn2: ")
+  switch owig.res {
+    case SIZE_4K:
+      owig.Box(3323,45,50,50).Y2W()
+      owig.All().Th(224)
+      fnd,score=owig.At(3323,45).getPattern()
+    case SIZE_1080:
+      owig.Box(1662,23,25,25).Y2W()
+      owig.All().Th(224)
+      fnd,score=owig.At(1662,23).getPattern()
+  }
+  owig.Th(-1)
+  //fmt.Println("RESPAWN 2: ",fnd,score)
+  if fnd == "RESPAWN" && score>930 {
+    return SC_RESPAWN
+  }
+  //owig.Save("ocr.png")
+
   // Game screen ?
   if onFireIcon() {
     if config.dbg_screen {
@@ -220,7 +272,6 @@ func guessScreen() int {
     }
     return SC_GAME
   }
-
 
   //is it a "Main screen" (screen you see after logging in)
   owig.All().Th(224)
@@ -769,11 +820,12 @@ func interpret() {
     case SC_UNKNOWN:
       // just ignore
 
-    case SC_GAME: {
+    case SC_GAME:
+      if game.pscreen!=game.screen {
         dbgWindow("Game screen")
-        if game.state==GS_NONE {
-          game.state=GS_START
-        }
+      }
+      if game.state==GS_NONE {
+        game.state=GS_START
       }
 
     case SC_MAIN:
@@ -831,6 +883,17 @@ func interpret() {
         if config.dbg_screen {
           fmt.Println("SR Current : ",game.currentSR)
         }
+      }
+    case SC_POTG:
+      if game.pscreen!=game.screen {
+        dbgWindow("POTG playing")
+      }
+      if game.state!=GS_END {
+        game.state=GS_END
+      }
+    case SC_RESPAWN:
+      if game.pscreen!=game.screen {
+        dbgWindow("Waiting for Respawn")
       }
     default:
       dbgWindow("Detected unknown screen type: "+strconv.Itoa(game.screen))
