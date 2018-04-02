@@ -162,7 +162,7 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
     fbounds,_,_:=canvas.MeasureText(game.mapname,tfont,rbounds, walk.TextCalcRect)
     rbounds.X=10+fbounds.Width+10
     canvas.DrawText(game.gametype,tfont,walk.RGB(212,212,0),rbounds, 0)
-    fbounds,_,_=canvas.MeasureText(game.gametype,tfont,rbounds, 0)
+    fbounds,_,_=canvas.MeasureText(game.gametype,tfont,rbounds, walk.TextCalcRect)
 
     rbounds.X=bounds.Width-80
     canvas.DrawText(game.time,tfont,walk.RGB(212,212,212),rbounds, 0)
