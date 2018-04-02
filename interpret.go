@@ -681,6 +681,50 @@ func parseTabStats() {
 }
 
 // ----------------------------------------------------------------------------
+// Get info from game screen
+
+func parseGameScreen() {
+
+  var y int
+  var y2 int
+  var xl int
+  var xr int
+
+  if config.dbg_screen {
+    fmt.Println("== parseGameScreen ==")
+  }
+
+  if game.gametype=="COMPETITIVE PLAY" && game.time != "0:00" {
+    switch owig.res {
+      case SIZE_4K:
+        y=200
+        y2=190
+      case SIZE_1080:
+        y=100
+        y2=95
+    }
+    fnd:=false
+    owig.All()
+    for s:=0;s<400 && !fnd;s++ {
+      xr=owig.width/2+s
+      xl=owig.width/2-s
+      if owig.At(xr,y).Red()-owig.Blue() > 150 && owig.Green() < 50 {
+        if owig.At(xl,y).Blue()-owig.Red() > 150 && owig.Green() < owig.Blue() {
+          fnd=true
+        }
+      }
+    }
+    if fnd {
+      if owig.At(xr,y2).Red()>150 && owig.At(xl,y2).Blue()<150 {
+        game.side="defend"
+      } else if owig.At(xr,y2).Red()<150 && owig.At(xl,y2).Blue()>150 {
+        game.side="attack"
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
 // Get statistics of Assemble screen
 func parseAssembleScreen() {
 
@@ -701,7 +745,7 @@ func parseAssembleScreen() {
   }
   if (P.B>P.R) {
     // blue color dominates, so defense
-    game.side="defense"
+    game.side="defend"
   }
 }
 
@@ -827,7 +871,7 @@ func interpret() {
       if game.state==GS_NONE {
         game.state=GS_START
       }
-
+      parseGameScreen()
     case SC_MAIN:
       if game.pscreen!=game.screen {
         initGameInfo()
@@ -841,8 +885,8 @@ func interpret() {
           game.state=GS_START
         }
         dbgWindow("Assemble team detected "+game.side)
-        parseAssembleScreen()
       }
+      parseAssembleScreen()
     case SC_TAB:
       parseTabStats()
       if game.time=="0:00" {

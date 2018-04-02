@@ -34,11 +34,17 @@ func cleanMapname(m string) string {
     "RADO": "DORADO",
     "LIO": "ILIOS",
     "WOOD": "HOLLYWOOD",
+    "EPAL": "NEPAL",
     "OINT": "WATCHPOINT: GIBRALTAR",
     "ASIS": "OASIS",
     "NAMUR": "HANAMURA",
     "TOWN": "JUNKERTOWN",
+    "WORLD": "BLIZZARD WORLD",
     "UNKER": "JUNKERTOWN",
+    "TOWER": "LIJIANG TOWER",
+    "INDUSTRIES": "VOLSKAYA INDUSTRIES",
+    "COLON": "HORIZON LUNAR COLONY",
+    "UMBANI": "NUMBANI",
   }
 
   return forceName(m,fl)

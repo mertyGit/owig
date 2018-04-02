@@ -172,7 +172,7 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
   if game.side=="attack" {
     canvas.DrawText("Attack",tifont,walk.RGB(212,100,100),rbounds, 0)
   } else {
-    if game.side=="attack" {
+    if game.side=="defend" {
       canvas.DrawText("Defense",tifont,walk.RGB(100,100,212),rbounds, 0)
     }
   }
