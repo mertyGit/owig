@@ -558,7 +558,7 @@ func (w *Oww) Run() {
     g:=<-w.ch
     skip:=false
     // prevent sending same information if information is the same
-    if ChangedGI(g,old)) {
+    if ChangedGI(g,old) {
       // prevent sending multiple SRGAIN intepretations
       if g.pscreen == g.screen && g.screen == SC_SRGAIN {
         skip=true
