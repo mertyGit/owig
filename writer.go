@@ -550,7 +550,6 @@ func (w *Oww) WriteXLSX(g GameInfo) {
 
 func (w *Oww) Run() {
   var old GameInfo
-  init:=false
   if !w.init {
     return
   }
@@ -559,11 +558,11 @@ func (w *Oww) Run() {
     g:=<-w.ch
     skip:=false
     // prevent sending same information if information is the same
-    if (init && ChangedGI(g,old)) || !init {
+    if ChangedGI(g,old)) {
       // prevent sending multiple SRGAIN intepretations
-      if old.screen == g.screen && g.screen == SC_SRGAIN {
+      if g.pscreen == g.screen && g.screen == SC_SRGAIN {
         skip=true
-      } else if old.screen == SC_SRGAIN {
+      } else if g.pscreen == SC_SRGAIN {
         if (w.isxl) {
           w.WriteXLSX(old)
         } else {
@@ -578,7 +577,6 @@ func (w *Oww) Run() {
         }
       }
       old=g
-      init=true
     }
   }
 }
