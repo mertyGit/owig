@@ -158,13 +158,16 @@ func guessScreen() int {
         case SIZE_4K:
           crc1=owig.From(3040,60).To(3160,180).Cs()
           crc2=owig.From(114,336).To(399,621).Cs()
-          same=owig.From(3040,60).To(3160,180).SameBase("B")
+          //same=owig.From(3040,60).To(3160,180).SameBase("B")
         case SIZE_1080:
           crc1=owig.From(1521,30).To(1579,89).Cs()
           crc2=owig.From(58,168).To(198,309).Cs()
-          same=owig.From(1520,30).To(1579,89).SameBase("B")
+          // Removed ... leads to wrong recognition of stats of others
+          // directly from overview menu during game or recend players
+          // no way to identify if it is yourself or not
+          //same=owig.From(1520,30).To(1579,89).SameBase("B")
       }
-      if crc1==crc2 || same {
+      if crc1==crc2 {
         if config.dbg_screen {
           fmt.Println(" Player Overview screen")
         }
