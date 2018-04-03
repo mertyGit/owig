@@ -197,6 +197,51 @@ func ChangedGI(a,b GameInfo) bool {
   return false
 }
 
+func SC2Name(id int) string {
+  switch id {
+    case SC_UNKNOWN:
+      return "UNKNOWN"
+    case SC_TAB:
+      return "TAB"
+    case SC_VICTORY:
+      return "VICTORY"
+    case SC_DEFEAT:
+      return "DEFEAT"
+    case SC_OVERVIEW:
+      return "OVERVIEW"
+    case SC_SRGAIN:
+      return "SRGAIN"
+    case SC_ASSEMBLE:
+      return "ASSEMBLE"
+    case SC_MAIN:
+      return "MAIN"
+    case SC_ENDING:
+      return "ENDING"
+    case SC_GAME:
+      return "GAME"
+    case SC_POTG:
+      return "POTG"
+    case SC_RESPAWN:
+      return "RESPAWN"
+  }
+  return "UNASSIGNED"
+}
+
+func GS2Name (id int) string {
+  switch id {
+    case GS_NONE:
+      return "START"
+    case GS_START:
+      return "START"
+    case GS_RUN:
+      return "RUN"
+    case GS_END:
+      return "END"
+  }
+  return "UNASSIGNED"
+}
+
+
 
 func (w *Oww) WriteCSV(g GameInfo) {
   t:=time.Now()
@@ -208,38 +253,9 @@ func (w *Oww) WriteCSV(g GameInfo) {
   fmt.Fprintf(w.file,"\"%s\"%s",g.time,config.divider)
   // "screen"
   s:="UNKNOWN"
-  switch g.screen {
-    case SC_TAB:
-      s="TAB"
-    case SC_VICTORY:
-      s="VICTORY"
-    case SC_DEFEAT:
-      s="DEFEAT"
-    case SC_OVERVIEW:
-      s="OVERVIEW"
-    case SC_SRGAIN:
-      s="SRGAIN"
-    case SC_ASSEMBLE:
-      s="ASSEMBLE"
-    case SC_MAIN:
-      s="MAIN"
-    case SC_ENDING:
-      s="ENDING"
-    case SC_GAME:
-      s="GAME"
-  }
-  fmt.Fprintf(w.file,"\"%s\"%s",s,config.divider)
+  fmt.Fprintf(w.file,"\"%s\"%s",SC2Name(g.screen),config.divider)
   // "game state"
-  s="NONE"
-  switch g.state {
-    case GS_START:
-      s="START"
-    case GS_RUN:
-      s="RUN"
-    case GS_END:
-      s="END"
-  }
-  fmt.Fprintf(w.file,"\"%s\"%s",s,config.divider)
+  fmt.Fprintf(w.file,"\"%s\"%s",GS2Name(g.state),config.divider)
   // mapname
   fmt.Fprintf(w.file,"\"%s\"%s",g.mapname,config.divider)
   // gametype
@@ -358,6 +374,7 @@ func (w *Oww) WriteCSV(g GameInfo) {
 }
 
 func (w *Oww) WriteXLSX(g GameInfo) {
+  var s string
 
   row:=fmt.Sprintf("%d",len(w.xlfile.GetRows("owig"))+1)
   style,_ := w.xlfile.NewStyle(`{"number_format":1}`)
@@ -372,39 +389,9 @@ func (w *Oww) WriteXLSX(g GameInfo) {
   //"game time"
   w.xlfile.SetCellValue("owig",excelize.ToAlphaString(2)+row,g.time)
   // "screen"
-  s:="UNKNOWN"
-  switch g.screen {
-    case SC_TAB:
-      s="TAB"
-    case SC_VICTORY:
-      s="VICTORY"
-    case SC_DEFEAT:
-      s="DEFEAT"
-    case SC_OVERVIEW:
-      s="OVERVIEW"
-    case SC_SRGAIN:
-      s="SRGAIN"
-    case SC_ASSEMBLE:
-      s="ASSEMBLE"
-    case SC_MAIN:
-      s="MAIN"
-    case SC_ENDING:
-      s="ENDING"
-    case SC_GAME:
-      s="GAME"
-  }
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(3)+row,s)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(3)+row,SC2Name(g.screen))
   // "game state"
-  s="NONE"
-  switch g.state {
-    case GS_START:
-      s="START"
-    case GS_RUN:
-      s="RUN"
-    case GS_END:
-      s="END"
-  }
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(4)+row,s)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(4)+row,GS2Name(g.state))
   // mapname
   w.xlfile.SetCellValue("owig",excelize.ToAlphaString(5)+row,g.mapname)
   // gametype
