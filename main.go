@@ -10,7 +10,7 @@ import (
 )
 
 //Version of program
-const VERSION = "Version 0.91"
+const VERSION = "Version 0.92"
 
 // ----------------------------------------------------------------------------
 // Constants for screen resolutions
