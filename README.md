@@ -9,6 +9,13 @@ Don't use programs that are using overlays like Discord, it will mess with the r
 # Release information
 WARNING: STILL BETA Usable to track on going progress and stats, but no garantees whatsover
 
+Version 0.93: 
+- Added information about objectives (WAITING, A,B or PAYLOAD) and more info about payload; points taken, total amount of points, position of payload relative to track between two points and total distance start-end
+- Any wrong intepretation of attack/defend during assembly screen, will be corrected via in-game information
+- No crashes when loading with non-existing (test)file
+- View cleanup & prevention settings of mismanagement of known mapnames
+- Cooler simpler logo
+
 Version 0.92: 
 - Added XLSX output functionality; now you can specify ".xlsx" file in statsfile, it will create or add rows to the "owig" sheet in your excel file
 
@@ -30,15 +37,17 @@ Version 0.81:
 * ~~Write CSV output~~
 * ~~Using more then one .ini file (to track multiple profiles/accounts)~~
 * ~~Write Excel output (?)~~
-* Recognision of Gaming screen to gather gamestats (score, position payload, objectives captured)
+* Recognision of Gaming screen to gather gamestats (score, ~~position payload, objectives captured~~)
 * Card information on end of game
+
+# MAYBE TODO:
 * Recognize and notify about (enemy-) composition changes
 
 
 # Bugs:
 * ~~Wrong choice of statistic lines for own hero: When joining game as group, but leaving when in same game, your own hero position in TAB screen isn't on the left anymore..~~
 * ~~Assembly screen isn't recognized or recognized at wrong time~~
-* Can't determine attack/defend on assembly screen: Algorithm uses color to find out, but in some cases "Attack" is written in blue....
+* ~~Can't determine attack/defend on assembly screen: Algorithm uses color to find out, but in some cases "Attack" is written in blue....~~
 * When viewing stats of someone who has same icon, it will assume these are your stats
 * Victory or Defeat message with scores under it will not be recognized
 * Crashes on missing or wrong files given at startup

@@ -20,6 +20,11 @@ func initGameInfo() {
   game.enemy.isChanged=false
   game.own.isChanged=false
   game.time=""
+  game.objective=""
+  game.plpoint=0
+  game.plamount=0
+  game.pltrack=0
+  game.pltotal=0
   game.ts=time.Now().UnixNano()/1000000
   for i:=0;i<6;i++ {
     game.enemy.hero[i]=""

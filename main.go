@@ -10,7 +10,7 @@ import (
 )
 
 //Version of program
-const VERSION = "Version 0.92"
+const VERSION = "Version 0.93"
 
 // ----------------------------------------------------------------------------
 // Constants for screen resolutions
@@ -51,6 +51,13 @@ type GameInfo struct {
   mapname   string   // Name of map we are playing, like "ILIOS" 
   gametype  string   // Game type, like "MYSTERY HEROES"  or "QUICK PLAY"
   side      string   // attack or defend
+  objective string   // objective state
+
+  plpoint      int   // captured points for payload
+  plamount     int   // amount of points to capture payload
+  pltrack      int   // percentage covered payload track between points 
+  pltotal      int   // percentage covered payload track between start & end 
+
   hero      string   // What the hero is playing at the moment 
   currentSR    int
   highestSR    int
@@ -97,14 +104,16 @@ func mainLoop() {
     for a:=ic;a<len(os.Args);a++ {
       ts("open")
       owig.Open(os.Args[a])
-      ts("interpret")
-      interpret()
-      wrt.Send()
-      ts("sleep")
-      mainWindow.Invalidate()
-      dbgWindow("Reading File: "+os.Args[a])
-      if (a+1<len(os.Args)) {
-        time.Sleep(time.Duration(config.dbg_pause) * time.Millisecond)
+      if owig.gotimg {
+        ts("interpret")
+        interpret()
+        wrt.Send()
+        ts("sleep")
+        mainWindow.Invalidate()
+        dbgWindow("Reading File: "+os.Args[a])
+        if (a+1<len(os.Args)) {
+          time.Sleep(time.Duration(config.dbg_pause) * time.Millisecond)
+        }
       }
       ts("afsleep")
     }

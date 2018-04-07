@@ -32,6 +32,11 @@ func (w *Oww) Init() {
     "mapname",
     "gametype",
     "side",
+    "objective",
+    "pl point",
+    "pl amount",
+    "pl track%",
+    "pl total%",
     "hero",
     "group id",
     "SR",
@@ -158,6 +163,9 @@ func ChangedGI(a,b GameInfo) bool {
   if a.side !=  b.side {
     return true
   }
+  if a.objective !=  b.objective {
+    return true
+  }
   if a.hero !=  b.hero {
     return true
   }
@@ -245,16 +253,16 @@ func GS2Name (id int) string {
 
 func (w *Oww) WriteCSV(g GameInfo) {
   t:=time.Now()
-  // "logtime"
+  // logtime
   fmt.Fprintf(w.file,"\"%s\"%s",t.Local(),config.divider)
-  // "timestamp"
+  // timestamp
   fmt.Fprintf(w.file,"%d%s",g.ts,config.divider)
-  //"game time"
+  // game time
   fmt.Fprintf(w.file,"\"%s\"%s",g.time,config.divider)
-  // "screen"
+  // screen
   s:="UNKNOWN"
   fmt.Fprintf(w.file,"\"%s\"%s",SC2Name(g.screen),config.divider)
-  // "game state"
+  // game state
   fmt.Fprintf(w.file,"\"%s\"%s",GS2Name(g.state),config.divider)
   // mapname
   fmt.Fprintf(w.file,"\"%s\"%s",g.mapname,config.divider)
@@ -262,6 +270,16 @@ func (w *Oww) WriteCSV(g GameInfo) {
   fmt.Fprintf(w.file,"\"%s\"%s",g.gametype,config.divider)
   // side
   fmt.Fprintf(w.file,"\"%s\"%s",g.side,config.divider)
+  // objective
+  fmt.Fprintf(w.file,"\"%s\"%s",g.objective,config.divider)
+  // pl point
+  fmt.Fprintf(w.file,"%d%s",g.plpoint,config.divider)
+  // pl amount
+  fmt.Fprintf(w.file,"%d%s",g.plamount,config.divider)
+  // pl track%
+  fmt.Fprintf(w.file,"%d%s",g.pltrack,config.divider)
+  // pl total%
+  fmt.Fprintf(w.file,"%d%s",g.pltotal,config.divider)
   // hero
   fmt.Fprintf(w.file,"\"%s\"%s",g.hero,config.divider)
   // Group id
@@ -381,157 +399,235 @@ func (w *Oww) WriteXLSX(g GameInfo) {
 
 
   t:=time.Now()
-  // "logtime"
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(0)+row,t.Local())
-  // "timestamp"
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(1)+row,g.ts)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(1)+row,excelize.ToAlphaString(1)+row,style)
-  //"game time"
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(2)+row,g.time)
-  // "screen"
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(3)+row,SC2Name(g.screen))
-  // "game state"
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(4)+row,GS2Name(g.state))
+  i:=0
+  // logtime
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,t.Local())
+  i++
+  // timestamp
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.ts)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
+  // game time
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.time)
+  i++
+  // screen
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,SC2Name(g.screen))
+  i++
+  // game state
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,GS2Name(g.state))
+  i++
   // mapname
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(5)+row,g.mapname)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.mapname)
+  i++
   // gametype
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(6)+row,g.gametype)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.gametype)
+  i++
   // side
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(7)+row,g.side)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.side)
+  i++
+  // objective
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.objective)
+  i++
+  // pl point
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.plpoint)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
+  // pl amount
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.plamount)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
+  // pl track%
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.pltrack)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
+  // pl total%
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.pltotal)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // hero
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(8)+row,g.hero)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.hero)
+  i++
   // Group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(9)+row,g.group)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.group)
+  i++
   // SR
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(10)+row,g.currentSR)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(10)+row,excelize.ToAlphaString(10)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.currentSR)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // highest SR
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(11)+row,g.highestSR)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(11)+row,excelize.ToAlphaString(11)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.highestSR)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Eleminations
   v,_:=strconv.Atoi(g.lstats[0])
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(12)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(12)+row,excelize.ToAlphaString(12)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Objective Kills
   v,_=strconv.Atoi(g.lstats[1])
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(13)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(13)+row,excelize.ToAlphaString(13)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Objective Time
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(14)+row,g.lstats[2])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.lstats[2])
+  i++
   // Hero Damage Done
   v,_=strconv.Atoi(g.lstats[3])
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(15)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(15)+row,excelize.ToAlphaString(15)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Healing Done
   v,_=strconv.Atoi(g.lstats[4])
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(16)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(16)+row,excelize.ToAlphaString(16)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Deaths
   v,_=strconv.Atoi(g.lstats[5])
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(17)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(17)+row,excelize.ToAlphaString(17)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Eleminations Medal
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(18)+row,g.medals[0])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.medals[0])
+  i++
   // Objective Kills Medal
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(19)+row,g.medals[1])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.medals[1])
+  i++
   // Objective Time Medal
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(20)+row,g.medals[2])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.medals[2])
+  i++
   // Hero Damage Done Medal
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(21)+row,g.medals[3])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.medals[3])
+  i++
   // Healing Done Medal
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(22)+row,g.medals[4])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.medals[4])
+  i++
   // Stat name 1
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(23)+row,getStatsline(g.hero,0))
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,getStatsline(g.hero,0))
+  i++
   // Stat value 1
   s=strings.Replace(g.rstats[0],"%","",-1)
   v,_=strconv.Atoi(s)
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(24)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(24)+row,excelize.ToAlphaString(24)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Stat name 2
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(25)+row,getStatsline(g.hero,1))
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,getStatsline(g.hero,1))
+  i++
   // Stat value 2
   s=strings.Replace(g.rstats[1],"%","",-1)
   v,_=strconv.Atoi(s)
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(26)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(26)+row,excelize.ToAlphaString(26)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Stat name 3
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(27)+row,getStatsline(g.hero,2))
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,getStatsline(g.hero,2))
+  i++
   // Stat value 3
   s=strings.Replace(g.rstats[2],"%","",-1)
   v,_=strconv.Atoi(s)
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(28)+row,s)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(28)+row,excelize.ToAlphaString(28)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,s)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Stat name 4
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(29)+row,getStatsline(g.hero,3))
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,getStatsline(g.hero,3))
+  i++
   // Stat value 4
   s=strings.Replace(g.rstats[3],"%","",-1)
   v,_=strconv.Atoi(s)
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(30)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(30)+row,excelize.ToAlphaString(30)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Stat name 5
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(31)+row,getStatsline(g.hero,4))
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,getStatsline(g.hero,4))
+  i++
   // Stat value 5
   s=strings.Replace(g.rstats[4],"%","",-1)
   v,_=strconv.Atoi(s)
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(32)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(32)+row,excelize.ToAlphaString(32)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // Stat name 6
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(33)+row,getStatsline(g.hero,5))
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,getStatsline(g.hero,5))
+  i++
   // Stat value 6
   s=strings.Replace(g.rstats[5],"%","",-1)
   v,_=strconv.Atoi(s)
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(34)+row,v)
-  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(34)+row,excelize.ToAlphaString(34)+row,style)
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,v)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
   // enemy hero 1
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(35)+row,g.enemy.hero[0])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.hero[0])
+  i++
   // enemy hero 1 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(36)+row,g.enemy.groupid[0])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.groupid[0])
+  i++
   // enemy hero 2
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(37)+row,g.enemy.hero[1])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.hero[1])
+  i++
   // enemy hero 2 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(38)+row,g.enemy.groupid[1])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.groupid[1])
+  i++
   // enemy hero 3
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(39)+row,g.enemy.hero[2])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.hero[2])
+  i++
   // enemy hero 3 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(40)+row,g.enemy.groupid[2])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.groupid[2])
+  i++
   // enemy hero 4
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(41)+row,g.enemy.hero[3])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.hero[3])
+  i++
   // enemy hero 4 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(42)+row,g.enemy.groupid[3])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.groupid[3])
+  i++
   // enemy hero 5
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(43)+row,g.enemy.hero[4])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.hero[4])
+  i++
   // enemy hero 5 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(44)+row,g.enemy.groupid[4])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.groupid[4])
+  i++
   // enemy hero 6
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(45)+row,g.enemy.hero[5])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.hero[5])
+  i++
   // enemy hero 6 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(46)+row,g.enemy.groupid[5])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.enemy.groupid[5])
+  i++
   // own team hero 1
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(47)+row,g.own.hero[0])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.hero[0])
+  i++
   // own team hero 1 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(48)+row,g.own.groupid[0])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.groupid[0])
+  i++
   // own team hero 2
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(49)+row,g.own.hero[1])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.hero[1])
+  i++
   // own team hero 2 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(50)+row,g.own.groupid[1])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.groupid[1])
+  i++
   // own team hero 3
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(51)+row,g.own.hero[2])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.hero[2])
+  i++
   // own team hero 3 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(52)+row,g.own.groupid[2])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.groupid[2])
+  i++
   // own team hero 4
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(53)+row,g.own.hero[3])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.hero[3])
+  i++
   // own team hero 4 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(54)+row,g.own.groupid[3])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.groupid[3])
+  i++
   // own team hero 5
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(55)+row,g.own.hero[4])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.hero[4])
+  i++
   // own team hero 5 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(56)+row,g.own.groupid[4])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.groupid[4])
+  i++
   // own team hero 6
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(57)+row,g.own.hero[5])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.hero[5])
+  i++
   // own team hero 6 group id
-  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(58)+row,g.own.groupid[5])
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.own.groupid[5])
+  i++
   w.xlfile.SetActiveSheet(w.xlidx)
-
   w.xlfile.SaveAs(config.stats)
 }
 

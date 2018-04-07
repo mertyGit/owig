@@ -33,6 +33,11 @@ func guessScreen() int {
   }
   ts("gstart")
 
+  // Is there an image to process ? 
+  if !owig.gotimg {
+    return SC_UNKNOWN
+  }
+
   // Tab statistics ?
   // grey bar + black left upper corner, right under title / time
   l1:=false
@@ -690,13 +695,18 @@ func parseGameScreen() {
 
   var y int
   var y2 int
+  var x int
   var xl int
   var xr int
+  var cnt int
+  var line string
+  var font map[string][][]int
 
   if config.dbg_screen {
     fmt.Println("== parseGameScreen ==")
   }
 
+  // Determine if we are attacking or defending
   if game.gametype=="COMPETITIVE PLAY" && game.time != "0:00" {
     switch owig.res {
       case SIZE_4K:
@@ -725,6 +735,239 @@ func parseGameScreen() {
       }
     }
   }
+
+  // Get opjective text
+
+  // First, figure out bounderies of text to intepret (without counting 
+  // time on left or any other things on the sides
+  switch owig.res {
+    case SIZE_4K:
+      y=150
+      y2=30
+      owig.All().Th(220)
+      font=FontObjective4K
+    case SIZE_1080:
+      y=75
+      y2=15
+      owig.All().Th(200)
+      font=FontObjective1080
+  }
+
+  // Find right border of text
+  fnd:=false
+  for s:=0;s<400 && !fnd;s++ {
+    xr=owig.width/2+s
+    if owig.At(xr,y).isAbove() {
+      cnt=0
+    } else {
+      cnt++
+    }
+    if cnt>y2{
+      fnd=true
+      xr-=y2/2
+    }
+  }
+  // Find left border of text
+  if fnd {
+    cnt=0
+    fnd=false
+    for s:=0;s<400 && !fnd;s++ {
+      xl=owig.width/2-s
+      if owig.At(xl,y).isAbove() {
+        cnt=0
+      } else {
+        cnt++
+      }
+      if cnt>y2{
+        fnd=true
+        xl+=y2/2
+      }
+    }
+  }
+
+  // if both are found, ocr the text within
+  if fnd {
+    if config.dbg_ocr {
+      fmt.Println(" Searching for Objective text")
+    }
+    cnt=1
+    owig.Box(xl,y-(2*y2/3),xr-xl,4*y2/3)
+    for cx:=0; cx<xr-xl; cx++ {
+      for cy:=0; cy<4*y2/3; cy++ {
+        if owig.At(cx,cy).isAbove() {
+          if config.dbg_ocr {
+            fmt.Println(" Character # ",cnt," at",cx,cy)
+          }
+          ch,_,_:=owig.getChar(font)
+          line+=ch
+          cnt++
+        }
+      }
+    }
+    if config.dbg_ocr {
+      fmt.Println(" got line:",line)
+    }
+    if line!="" {
+      // Check objective
+      if strings.HasSuffix(line,"VEA") {
+        // .....OBJECTIVE A"
+        game.objective="A"
+        game.state=GS_RUN
+      } else if strings.HasSuffix(line,"VEB") {
+        // .....OBJECTIVE B"
+        game.objective="B"
+        game.state=GS_RUN
+      } else if strings.Contains(line,"PAY")||strings.HasSuffix(line,"OAD")||strings.HasPrefix(line,"ESC")||strings.HasPrefix(line,"STOP") {
+        // ...PAYLOAD
+        game.objective="PAYLOAD"
+        game.state=GS_RUN
+      }
+      if strings.HasPrefix(line,"PREP") {
+        // PREPARTE TO ...
+        game.objective="WAITING"
+        game.state=GS_START
+      }
+
+
+      if strings.HasPrefix(line,"DEF") || strings.HasPrefix(line,"BEF") || strings.HasPrefix(line,"STOP") || strings.HasPrefix(line,"NSES") {
+        // DEFEND OBJECTIVE ...  or STOP THE ... or PREPARE YOUR DEFENSES...
+        //(BEF=DEF, but sometimes wrong intepreted..)
+        game.side="defend"
+      } else if strings.HasPrefix(line,"AT") || strings.HasPrefix(line,"ESC") || strings.HasPrefix(line,"ACK") {
+        // ATTACK OBJECTIVE ...  or ESCORD THE ... or PREPARE YOUR ATTACK...
+        game.side="attack"
+      }
+
+      if game.objective=="PAYLOAD" {
+        // Figure out what points we have captured
+        // scan for pointindicators
+        switch owig.res {
+          case SIZE_4K:
+            y=286
+            y2=320
+            x=1571
+            xr=2370
+          case SIZE_1080:
+            y=143
+            y2=160
+            x=786
+            xr=1185
+        }
+        ep:=0
+        owig.All()
+        last:="_"
+        px:=make([]int,5,5)
+        pt:=make([]string,5,5)
+        pcnt:=0
+        for cx:=x;cx<xr && ep==0;cx++ {
+
+          owig.At(cx,y2)
+          if owig.Red()>210 && owig.Green()<20 && owig.Blue()<owig.Red() {
+            // Red pointer found ?
+            if last != "R" {
+              xl=cx
+              pt[pcnt]="R"
+              last="R"
+            }
+          } else if owig.Blue()>220 && owig.Red()<100 && owig.Green()<owig.Blue() {
+            // Blue pointer found ?
+            if last != "B" {
+              xl=cx
+              pt[pcnt]="B"
+              last="B"
+            }
+          } else if owig.Red()>210 && owig.Green()>150 && owig.Blue()<100 {
+            // Yellow pointer found ?
+            if last != "Y" {
+              xl=cx
+              pt[pcnt]="Y"
+              last="Y"
+            }
+          } else if owig.Red()>220 && owig.Green()>220 && owig.Blue()>220 {
+            // White pointer found ?
+            if last != "W" {
+              xl=cx
+              pt[pcnt]="W"
+              last="W"
+            }
+          } else {
+            if last != "_" {
+              px[pcnt]=xl+((cx-xl)/2)
+              if last == "W" || last == "Y" {
+                ep=px[pcnt]
+              }
+              pcnt++
+              last="_"
+            }
+          }
+        }
+        if config.dbg_screen {
+          fmt.Print(" Got payload: ")
+          for cx:=0;cx<pcnt;cx++ {
+            fmt.Print(px[cx],":",pt[cx]," ")
+          }
+          fmt.Println();
+          fmt.Println(" Endpoint",ep);
+        }
+
+
+        // Second, get start & lenght of line
+        cnt:=0
+        ch:=""
+        for cx:=x;cx<ep;cx++ {
+          owig.At(cx,y)
+          if (ch=="" || ch=="B") && owig.Blue()>220 && owig.Red()<100 && owig.Green()<owig.Blue() {
+            ch="B"
+          } else if (ch=="" || ch=="R") && owig.Red()>210 && owig.Green()<20 && owig.Blue()<owig.Red() {
+            ch="R"
+          } else if cnt>0 {
+            // end of line reached
+            cx=ep
+          }
+          if !(ch=="") {
+            if cnt==0 {
+              x=cx
+            }
+            cnt++
+          }
+        }
+        end:=x+cnt
+        perc:=100*cnt/(ep-x)
+        xl=x
+        xr=0
+        pp:=0
+        for cx:=0;cx<pcnt && xr==0;cx++ {
+          if px[cx]<end {
+            xl=px[cx]
+            pp++
+          } else if px[cx]>end {
+            xr=px[cx]
+          }
+        }
+        tperc:=100*(end-xl)/(xr-xl)
+
+        // At this point, we have all information of the progress line 
+        game.plpoint=pp
+        game.plamount=pcnt
+        game.pltrack=tperc
+        game.pltotal=perc
+
+        if config.dbg_screen {
+          fmt.Println(" Color: ",ch," Start: ",x," End: ",end," Percentage: ",perc)
+          fmt.Println(" On traject: ",xl," to: ",xr," Percentage: ",tperc)
+          fmt.Println(" Position: ",pp," of",pcnt)
+        }
+      } // PAYLOAD
+
+      // If objective, delete any payload info, just to be sure
+      if game.objective=="A" || game.objective=="B" {
+        game.plpoint=0
+        game.plamount=0
+        game.pltrack=0
+        game.pltotal=0
+      }
+    } // Objective text found
+  } // Objective found
 }
 
 // ----------------------------------------------------------------------------

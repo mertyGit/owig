@@ -94,7 +94,7 @@ func (g *OWImg) Open(name string) *OWImg {
 
   file, err := os.Open(name)
   if err != nil {
-    fmt.Println("Warning: File could not be opened")
+    fmt.Println("Warning: File ",name," could not be opened")
     return g
   }
 
