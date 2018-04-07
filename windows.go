@@ -359,7 +359,7 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
     canvas.DrawText(game.dmsg[3],dfont,walk.RGB(90,90,60),rbounds, walk.TextWordbreak)
   } else {
     // Or display logo with version information
-    canvas.DrawImage(owigsign, walk.Point{bounds.Width/2-200,bounds.Height-43})
+    canvas.DrawImage(owigsign, walk.Point{bounds.Width/2-65,bounds.Height-47})
     rbounds.Y=bounds.Height-13
     rbounds.X=bounds.Width/2-50
     canvas.DrawText(VERSION,dfont,walk.RGB(90,90,60),rbounds, walk.TextWordbreak)
