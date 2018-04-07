@@ -18,34 +18,69 @@ func forceName(n string, fl map[string]string ) string {
   return n
 }
 
+func checkName(n string, fl map[string]string ) bool {
+  for _,v := range fl {
+    if n==v {
+      return true
+    }
+  }
+  return false
+}
+
+
 func cleanGametype(m string) string {
   fl := map[string]string{
-    "COM": "COMPETITIVE PLAY",
-    "UIC": "QUICK PLAY",
+    "COM" : "COMPETITIVE PLAY",
+    "UIC" : "QUICK PLAY",
+    "MYS" : "MYSTERY HEROES",
+    "LIM" : "NO LIMITS",
+    "GAME": "GAME BROWSER",
+  }
+  r:=forceName(m,fl)
+  if r!=m || checkName(r,fl) {
+    game.forceT=true
+    return m
+  }
+  // Gametype not in list and found earlier one that was in list ?
+  // dont use found name, but already found name
+  if game.forceT {
+    return game.gametype
   }
 
-  return forceName(m,fl)
+  return r
 }
+
 
 func cleanMapname(m string) string {
   fl := map[string]string{
-    "ROW": "KING's ROW",
-    "EMPLE": "TEMPLE OF ANUBIS",
-    "RADO": "DORADO",
-    "LIO": "ILIOS",
-    "WOOD": "HOLLYWOOD",
-    "EPAL": "NEPAL",
-    "OINT": "WATCHPOINT: GIBRALTAR",
-    "ASIS": "OASIS",
-    "NAMUR": "HANAMURA",
-    "TOWN": "JUNKERTOWN",
-    "WORLD": "BLIZZARD WORLD",
-    "UNKER": "JUNKERTOWN",
-    "TOWER": "LIJIANG TOWER",
-    "INDUSTRIES": "VOLSKAYA INDUSTRIES",
-    "COLON": "HORIZON LUNAR COLONY",
-    "UMBANI": "NUMBANI",
+    "WORLD" : "BLIZZARD WORLD",
+    "RADO"  : "DORADO",
+    "WAL"   : "EICHENWALDE",
+    "NAMUR" : "HANAMURA",
+    "WOOD"  : "HOLLYWOOD",
+    "COLON" : "HORIZON LUNAR COLONY",
+    "LIO"   : "ILIOS",
+    "UNKER" : "JUNKERTOWN",
+    "TOWN"  : "JUNKERTOWN",
+    "ROW"   : "KING'S ROW",
+    "TOWER" : "LIJIANG TOWER",
+    "BANI"  : "NUMBANI",
+    "EPAL"  : "NEPAL",
+    "ASIS"  : "OASIS",
+    "UTE"   : "ROUTE 66",
+    "EMPLE" : "TEMPLE OF ANUBIS",
+    "INDU"  : "VOLSKAYA INDUSTRIES",
+    "OINT"  : "WATCHPOINT: GIBRALTAR",
   }
-
-  return forceName(m,fl)
+  r:=forceName(m,fl)
+  if r!=m || checkName(r,fl) {
+    game.forceM=true
+    return m
+  }
+  // Mapname not in list and found earlier one that was in list ?
+  // dont use found name, but already found name
+  if game.forceM {
+    return game.mapname
+  }
+  return r
 }

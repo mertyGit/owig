@@ -62,8 +62,9 @@ type GameInfo struct {
   own     TeamComp   // Enemy team composition (see below)
   result    string   // End result (won,lost,draw)
   dmsg   [4]string   // debug messages
+  forceM      bool   // Force found maptitle for rest of game
+  forceT      bool   // Force found gametype for rest of game
   image       bool   // are we using images instead of screenshots ?
-  snames [6]string   // Name of statistics field
 }
 
 type TeamComp struct {

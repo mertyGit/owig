@@ -15,6 +15,8 @@ func initGameInfo() {
   game.hero=""
   game.group=0
   game.result=""
+  game.forceM=false
+  game.forceT=false
   game.enemy.isChanged=false
   game.own.isChanged=false
   game.time=""

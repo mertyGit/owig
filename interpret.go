@@ -886,6 +886,8 @@ func interpret() {
       if game.state!=GS_END||game.image {
         if game.pscreen!=game.screen {
           game.state=GS_START
+          game.forceM=false
+          game.forceT=false
         }
         dbgWindow("Assemble team detected "+game.side)
       }
