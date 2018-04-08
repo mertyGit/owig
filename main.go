@@ -10,7 +10,7 @@ import (
 )
 
 //Version of program
-const VERSION = "Version 0.93"
+const VERSION = "Version 0.931"
 
 // ----------------------------------------------------------------------------
 // Constants for screen resolutions
@@ -52,12 +52,12 @@ type GameInfo struct {
   gametype  string   // Game type, like "MYSTERY HEROES"  or "QUICK PLAY"
   side      string   // attack or defend
   objective string   // objective state
-
   plpoint      int   // captured points for payload
   plamount     int   // amount of points to capture payload
   pltrack      int   // percentage covered payload track between points 
   pltotal      int   // percentage covered payload track between start & end 
-
+  compdef      int   // competitive score on defend
+  compatt      int   // competitive score on attack
   hero      string   // What the hero is playing at the moment 
   currentSR    int
   highestSR    int

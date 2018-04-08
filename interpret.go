@@ -703,6 +703,8 @@ func parseGameScreen() {
   var x int
   var xl int
   var xr int
+  var wx int
+  var wy int
   var cnt int
   var line string
   var font map[string][][]int
@@ -717,27 +719,82 @@ func parseGameScreen() {
       case SIZE_4K:
         y=200
         y2=190
+        wx=90
+        wy=70
+        font=FontScore4K
       case SIZE_1080:
         y=100
         y2=95
+        wx=45
+        wy=35
+        font=FontScore1080
     }
     fnd:=false
+    fndl:=false
+    fndr:=false
     owig.All()
-    for s:=0;s<400 && !fnd;s++ {
-      xr=owig.width/2+s
+    for s:=0;s<400 && !fndl;s++ {
       xl=owig.width/2-s
-      if owig.At(xr,y).Red()-owig.Blue() > 150 && owig.Green() < 50 {
-        if owig.At(xl,y).Blue()-owig.Red() > 150 && owig.Green() < owig.Blue() {
-          fnd=true
-        }
+      if owig.At(xl,y).Blue()-owig.Red() > 150 && owig.Green() < owig.Blue() {
+        fndl=true
       }
     }
+    for s:=0;s<400 && !fndr;s++ {
+      xr=owig.width/2+s
+      if owig.At(xr,y).Red()-owig.Blue() > 150 && owig.Green() < 50 {
+        fndr=true
+      }
+    }
+    if fndl && fndr {
+      fnd=true
+    }
     if fnd {
+      // determine if we are attacking or defining, based on colored box
       if owig.At(xr,y2).Red()>150 && owig.At(xl,y2).Blue()<150 {
         game.side="defend"
       } else if owig.At(xr,y2).Red()<150 && owig.At(xl,y2).Blue()>150 {
         game.side="attack"
       }
+      // now we have found the boxes, get the points out of it
+      if config.dbg_screen {
+        fmt.Println(" Getting scores: ")
+      }
+      owig.Box(xl-wx,y2-wy,wx,wy).Th(200)
+      lscore:=-1
+      for x:=0; x<wx && lscore<0; x++  {
+        for y:=0; y<wy && lscore<0 ; y++ {
+          if owig.At(x,y).isAbove() {
+            ch,_,p:=owig.getChar(font)
+            if p>700 {
+              lscore,_=strconv.Atoi(ch)
+              if config.dbg_screen {
+                fmt.Println("  Score Left  :",lscore,"(",p,")")
+              }
+            }
+          }
+        }
+      }
+      owig.Box(xr,y2-wy,wx,wy)
+      rscore:=-1
+      for x:=0; x<wx && rscore<0; x++  {
+        for y:=0; y<wy && rscore<0 ; y++ {
+          if owig.At(x,y).isAbove() {
+            ch,_,p:=owig.getChar(font)
+            if p>700 {
+              rscore,_=strconv.Atoi(ch)
+              if config.dbg_screen {
+                fmt.Println("  Score Right :",rscore,"(",p,")")
+              }
+            }
+          }
+        }
+      }
+      if lscore > -1 && rscore > -1 {
+        game.compdef=rscore
+        game.compatt=lscore
+      }
+      //owig.Save("score.png")
+      owig.Th(-1)
     }
   }
 

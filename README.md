@@ -10,11 +10,17 @@ Don't use programs that are using overlays like Discord, it will mess with the r
 WARNING: STILL BETA Usable to track on going progress and stats, but no garantees whatsover
 
 Version 0.93: 
+
+New functionality:
 - Added information about objectives (WAITING, A,B or PAYLOAD) and more info about payload; points taken, total amount of points, position of payload relative to track between two points and total distance start-end
+- Added defend & attack score for competitive games
+- Cooler simpler logo
+
+Bug Fixes
 - Any wrong intepretation of attack/defend during assembly screen, will be corrected via in-game information
 - No crashes when loading with non-existing (test)file
 - View cleanup & prevention settings of mismanagement of known mapnames
-- Cooler simpler logo
+- Preventing recognition of map title , time , game type when chat icon is blocking it
 
 Version 0.92: 
 - Added XLSX output functionality; now you can specify ".xlsx" file in statsfile, it will create or add rows to the "owig" sheet in your excel file
@@ -37,11 +43,16 @@ Version 0.81:
 * ~~Write CSV output~~
 * ~~Using more then one .ini file (to track multiple profiles/accounts)~~
 * ~~Write Excel output (?)~~
-* Recognision of Gaming screen to gather gamestats (score, ~~position payload, objectives captured~~)
-* Card information on end of game
+* ~~Recognition of Gaming screen to gather gamestats (score,position payload, objectives captured)~~
+* Recognition of group SR at start of game
 
 # MAYBE TODO:
-* Recognize and notify about (enemy-) composition changes
+* Recognize and notify about (enemy-) composition changes (tracked, but can easily determined or calculated in output)
+* percentage of capture point taken (hard)
+* Card information on end of game (hard, unknown who's card is yours)
+
+# DONT:
+* Scanning of username/battletag : to hard to write/learn ocr that understands ALL unicode characters for all fonts used
 
 
 # Bugs:
@@ -68,12 +79,22 @@ And tries to decrypt the information writes it to disk and to the Windows GUI sc
 
 Right now, it is able to figure out:
 
+Game screen (default game screen)
+* Competitive scores defend/attack 
+* Side defend, attack
+* Objective (A,B,Payload)
+* Payload progress % between points (track)
+* Payload progress % between start and finish (total)
+* Payload Points taken
+* All Payload Points
+
 In game statistics (what you get when pressing TAB):
 * Team composition, heroes choosen during game
 * Groups
 * Medals
 * All stats on lower end of screen
 * Mapname
+* Time
 * Gametype (Quickplay, Mystery Heroes and so on)
 
 Assemble screen (starting of match):

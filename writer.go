@@ -37,6 +37,8 @@ func (w *Oww) Init() {
     "pl amount",
     "pl track%",
     "pl total%",
+    "comp. defend score",
+    "comp. attack score",
     "hero",
     "group id",
     "SR",
@@ -280,6 +282,10 @@ func (w *Oww) WriteCSV(g GameInfo) {
   fmt.Fprintf(w.file,"%d%s",g.pltrack,config.divider)
   // pl total%
   fmt.Fprintf(w.file,"%d%s",g.pltotal,config.divider)
+  // comp. defend score
+  fmt.Fprintf(w.file,"%d%s",g.compdef,config.divider)
+  // comp. attack score
+  fmt.Fprintf(w.file,"%d%s",g.compatt,config.divider)
   // hero
   fmt.Fprintf(w.file,"\"%s\"%s",g.hero,config.divider)
   // Group id
@@ -442,6 +448,14 @@ func (w *Oww) WriteXLSX(g GameInfo) {
   i++
   // pl total%
   w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.pltotal)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
+  // comp. defend score
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.compdef)
+  w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
+  i++
+  // comp. attack score
+  w.xlfile.SetCellValue("owig",excelize.ToAlphaString(i)+row,g.compatt)
   w.xlfile.SetCellStyle("owig",excelize.ToAlphaString(i)+row,excelize.ToAlphaString(i)+row,style)
   i++
   // hero
