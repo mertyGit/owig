@@ -72,6 +72,7 @@ type GameInfo struct {
   forceM      bool   // Force found maptitle for rest of game
   forceT      bool   // Force found gametype for rest of game
   image       bool   // are we using images instead of screenshots ?
+  chat        bool   // are there chat icons on screen ?
 }
 
 type TeamComp struct {
@@ -134,7 +135,13 @@ func mainLoop() {
       ts("draw")
       mainWindow.Invalidate()
       ts("sleep")
-      time.Sleep(time.Duration(config.sleep) * time.Millisecond)
+      if (game.chat && game.screen==SC_TAB) {
+        // w've had a chat icon blocking our way, dont wait too long for
+        // another rety
+        time.Sleep(time.Duration(10) * time.Millisecond)
+      } else {
+        time.Sleep(time.Duration(config.sleep) * time.Millisecond)
+      }
     }
   }
 }

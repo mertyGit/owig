@@ -17,6 +17,7 @@ func initGameInfo() {
   game.result=""
   game.forceM=false
   game.forceT=false
+  game.chat=false
   game.enemy.isChanged=false
   game.own.isChanged=false
   game.time=""

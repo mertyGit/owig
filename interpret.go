@@ -38,6 +38,10 @@ func guessScreen() int {
     return SC_UNKNOWN
   }
 
+
+  // Any Chat icon messing up ?
+  checkChat()
+
   // Tab statistics ?
   // grey bar + black left upper corner, right under title / time
   l1:=false
@@ -623,21 +627,22 @@ func parseTabStats() {
   }
   ts("parsestart")
 
-  // Get Title and Game type
-  line:=owig.Title()
-  if strings.Contains(line,"|") {
-    game.mapname=cleanMapname(strings.Split(line,"|")[0])
-    game.gametype=cleanGametype(strings.Split(line,"|")[1])
-  }
-  ts("parse1")
+  // Dont bother to intepret title, game type or game time if
+  // chat icon(s) blocking your view
 
-  // Get Time
-  game.time=owig.TTime()
+  if !game.chat {
+    // Get Title and Game type
+    line:=owig.Title()
+    if strings.Contains(line,"|") {
+      game.mapname=cleanMapname(strings.Split(line,"|")[0])
+      game.gametype=cleanGametype(strings.Split(line,"|")[1])
+    }
+    ts("parse1")
 
-  // Figure out objective
-  if game.gametype=="COMPETITIVE PLAY" && game.time != "0:00" {
-    //fmt.Println("Objective=",guessCompObjective())
+    // Get Time
+    game.time=owig.TTime()
   }
+
 
   // Get own played hero, (not always the one on left bottom of composition)
   h:=owig.MyHero()
@@ -1020,6 +1025,33 @@ func parseEndScreen() {
   }
   if (crc== "72735") {
     game.result="won"
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Try to figure out if someone is chatting (and f*cking up stats with overlay)
+
+func checkChat() {
+  var x1,y,w,x2 int
+  switch owig.res {
+    case SIZE_4K:
+      x1=122
+      x2=202
+      y=130
+      w=10
+    case SIZE_1080:
+      x1=61
+      x2=101
+      y=65
+      w=5
+  }
+  if owig.Box(x1,y,w,w).SameColor(Pixel{134,225,0},5) || owig.Box(x1,y,w,w).SameColor(Pixel{0,220,225},5) || owig.Box(x2,y,w,w).SameColor(Pixel{134,225,0},5) || owig.Box(x2,y,w,w).SameColor(Pixel{0,220,225},5) {
+    if config.dbg_screen {
+      fmt.Println("chat icon present")
+    }
+    game.chat=true
+  } else {
+    game.chat=false
   }
 }
 
