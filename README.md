@@ -61,7 +61,7 @@ Version 0.81:
 * ~~Can't determine attack/defend on assembly screen: Algorithm uses color to find out, but in some cases "Attack" is written in blue....~~
 * When viewing stats of someone who has same icon, it will assume these are your stats
 * Victory or Defeat message with scores under it will not be recognized
-* Crashes on missing or wrong files given at startup
+* ~~Crashes on missing or wrong files given at startup~~
 
 # More about OWIG
 OWIG is program that will gather game statics while Overwatch game is running or by feeding it screenshots
