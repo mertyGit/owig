@@ -769,7 +769,7 @@ func (g *OWImg) SameColor(p Pixel,dev int) bool {
 
   for x:=0;x+g.pos.x<=g.pos.x2;x++ {
     for y:=0;y+g.pos.y<=g.pos.y2;y++ {
-      if g.At(x,y).isLike(p,dev) {
+      if !g.At(x,y).isLike(p,dev) {
         ret=false
       }
     }
