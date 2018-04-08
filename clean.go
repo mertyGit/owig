@@ -39,7 +39,7 @@ func cleanGametype(m string) string {
   r:=forceName(m,fl)
   if r!=m || checkName(r,fl) {
     game.forceT=true
-    return m
+    return r
   }
   // Gametype not in list and found earlier one that was in list ?
   // dont use found name, but already found name
@@ -75,7 +75,7 @@ func cleanMapname(m string) string {
   r:=forceName(m,fl)
   if r!=m || checkName(r,fl) {
     game.forceM=true
-    return m
+    return r
   }
   // Mapname not in list and found earlier one that was in list ?
   // dont use found name, but already found name
