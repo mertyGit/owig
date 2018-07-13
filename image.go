@@ -76,6 +76,8 @@ func (g *OWImg) setRes() *OWImg {
     g.res=SIZE_4K
   } else if g.width==1920 && g.height==1080 {
     g.res=SIZE_1080
+  } else if g.width==2560 && g.height==1440 {
+    g.res=SIZE_WQHD
   } else {
     if config.dbg_screen {
       fmt.Println("WARNING: Unknown screen size ",g.width," x",g.height)

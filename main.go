@@ -10,13 +10,14 @@ import (
 )
 
 //Version of program
-const VERSION = "Version 0.931"
+const VERSION = "Version 0.94"
 
 // ----------------------------------------------------------------------------
 // Constants for screen resolutions
 const SIZE_NONE     = 666
 const SIZE_4K       = 0
 const SIZE_1080     = 1
+const SIZE_WQHD     = 2
 
 // ----------------------------------------------------------------------------
 // Constants for screen types

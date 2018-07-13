@@ -168,6 +168,18 @@ func ChangedGI(a,b GameInfo) bool {
   if a.objective !=  b.objective {
     return true
   }
+  if a.plpoint !=  b.plpoint {
+    return true
+  }
+  if a.plamount !=  b.plamount {
+    return true
+  }
+  if a.pltrack !=  b.pltrack {
+    return true
+  }
+  if a.pltotal !=  b.pltotal {
+    return true
+  }
   if a.hero !=  b.hero {
     return true
   }

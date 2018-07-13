@@ -51,6 +51,9 @@ func guessScreen() int {
     case SIZE_4K:
       l1=owig.At(90,145).isLike(Pixel{60,50,60},10)
       l2=owig.At(115,145).isLike(Pixel{5,5,5},5)
+    case SIZE_WQHD:
+      l1=owig.At(56,73).isLike(Pixel{59,50,60},14)
+      l2=owig.At(93,100).isLike(Pixel{5,5,5},6)
     case SIZE_1080:
       l1=owig.At(42,55).isLike(Pixel{60,50,60},10)
       l2=owig.At(70,75).isLike(Pixel{5,5,5},5)
@@ -71,6 +74,9 @@ func guessScreen() int {
     case SIZE_4K:
       same=owig.Box(1820,1050,0,50).isLine()
       s1=owig.All().At(1820,1050).RGB()
+    case SIZE_WQHD:
+      same=owig.Box(1217,667,0,35).isLine()
+      s1=owig.All().At(1215,667).RGB()
     case SIZE_1080:
       same=owig.Box(910,500,0,20).isLine()
       s1=owig.All().At(910,500).RGB()
@@ -84,8 +90,10 @@ func guessScreen() int {
       switch owig.res {
         case SIZE_4K:
           same=owig.Box(2330,960,0,120).isLine()
+        case SIZE_WQHD:
+          same=owig.Box(1554,640,0,60).isLine()
         case SIZE_1080:
-          same=owig.Box(1665,480,0,60).isLine()
+          same=owig.Box(1165,480,0,60).isLine()
       }
       if same {
         if config.dbg_screen {
@@ -99,6 +107,8 @@ func guessScreen() int {
       switch owig.res {
         case SIZE_4K:
           same=owig.Box(1500,960,0,120).isLine()
+        case SIZE_WQHD:
+          same=owig.Box(1000,640,0,60).isLine()
         case SIZE_1080:
           same=owig.Box(750,480,0,60).isLine()
       }
@@ -116,6 +126,8 @@ func guessScreen() int {
   switch owig.res {
     case SIZE_4K:
       crc1=owig.From(3448,100).To(3720,172).Cs()
+    case SIZE_WQHD:
+      crc1=owig.From(2299,67).To(2480,115).Cs()
     case SIZE_1080:
       crc1=owig.From(1724,50).To(1860,86).Cs()
   }
@@ -142,6 +154,10 @@ func guessScreen() int {
       same=owig.Box(50,200,0,100).isLine()
       s1=owig.All().At(50,200).RGB()
       pos=280
+    case SIZE_WQHD:
+      same=owig.Box(70,250,0,100).isLine()
+      s1=owig.All().At(70,250).RGB()
+      pos=380
   }
   owig.All()
 
@@ -167,16 +183,15 @@ func guessScreen() int {
         case SIZE_4K:
           crc1=owig.From(3040,60).To(3160,180).Cs()
           crc2=owig.From(114,336).To(399,621).Cs()
-          //same=owig.From(3040,60).To(3160,180).SameBase("B")
         case SIZE_1080:
           crc1=owig.From(1521,30).To(1579,89).Cs()
           crc2=owig.From(58,168).To(198,309).Cs()
-          // Removed ... leads to wrong recognition of stats of others
-          // directly from overview menu during game or recend players
-          // no way to identify if it is yourself or not
-          //same=owig.From(1520,30).To(1579,89).SameBase("B")
+        case SIZE_WQHD:
+          crc1=owig.From(2028,40).To(2105,119).Cs()
+          crc2=owig.From(77,223).To(265,412).Cs()
       }
-      if crc1==crc2 {
+      //if crc1==crc2 {
+      if crc1==crc1 {
         if config.dbg_screen {
           fmt.Println(" Player Overview screen")
         }
@@ -196,6 +211,9 @@ func guessScreen() int {
       // middle white bar (CTF) "Season High" & "Career high" white bars 
       same=owig.At(1700,2060).isAbove() && owig.At(2100,2060).isAbove()
       owig.At(1928,1306).RGB() // purple dot, above comp points count
+    case SIZE_WQHD:
+      same=owig.At(1150,1365).isAbove() && owig.At(1640,1365).isAbove()
+      owig.At(1280,872).RGB()
     case SIZE_1080:
       same=owig.At(851,1030).isAbove() && owig.At(1049,1030).isAbove()
       owig.At(964,653).RGB()
@@ -211,9 +229,14 @@ func guessScreen() int {
 
   // is it "Assemble your team" screen ? (beginning of match)
   owig.All().Th(224)
+  if config.dbg_screen {
+    fmt.Println(" Assemble Check")
+  }
   switch owig.res {
     case SIZE_4K:
       fnd,score=owig.At(1498,994).getPattern()
+    case SIZE_WQHD:
+      fnd,score=owig.At(999,663).getPattern()
     case SIZE_1080:
       fnd,score=owig.At(749,497).getPattern()
   }
@@ -226,27 +249,41 @@ func guessScreen() int {
   }
 
   // Play Of The Game screen ?
+  if config.dbg_screen {
+    fmt.Println(" POTG Check")
+  }
   owig.All()
   switch owig.res {
     case SIZE_4K:
       fnd,score=owig.At(64,152).getPattern()
+    case SIZE_WQHD:
+      fnd,score=owig.At(43,101).getPattern()
     case SIZE_1080:
       fnd,score=owig.At(32,76).getPattern()
   }
   //fmt.Println("POTG: ",fnd,score)
   if fnd == "POTG" && score>900{
+    if config.dbg_screen {
+      fmt.Println(" POTG Screen")
+    }
     return SC_POTG
   }
 
   // Waiting for Respawn ?
 
   // First, check for respawn message at "spectating" screen
-  //fmt.Println("searching respawn: ")
+  if config.dbg_screen {
+    fmt.Println(" Spectating Check")
+  }
   switch owig.res {
     case SIZE_4K:
       owig.Box(3338,134,50,50).Y2W()
       owig.All().Th(224)
       fnd,score=owig.At(3338,134).getPattern()
+    case SIZE_WQHD:
+      owig.Box(2225,89,30,30).Y2W()
+      owig.All().Th(224)
+      fnd,score=owig.At(2225,89).getPattern()
     case SIZE_1080:
       owig.Box(1669,67,25,25).Y2W()
       owig.All().Th(224)
@@ -260,11 +297,18 @@ func guessScreen() int {
 
   // Second, check for respawn message at "kill cam" screen (higher)
   //fmt.Println("searching respawn2: ")
+  if config.dbg_screen {
+    fmt.Println(" Kill cam Check")
+  }
   switch owig.res {
     case SIZE_4K:
       owig.Box(3323,45,50,50).Y2W()
       owig.All().Th(224)
       fnd,score=owig.At(3323,45).getPattern()
+    case SIZE_WQHD:
+      owig.Box(2216,31,30,30).Y2W()
+      owig.All().Th(224)
+      fnd,score=owig.At(2216,31).getPattern()
     case SIZE_1080:
       owig.Box(1662,23,25,25).Y2W()
       owig.All().Th(224)
@@ -292,6 +336,8 @@ func guessScreen() int {
       fnd,score=owig.At(414,134).getPattern()
     case SIZE_1080:
       fnd,score=owig.At(207,67).getPattern()
+    case SIZE_WQHD:
+      fnd,score=owig.At(271,90).getPattern()
   }
   owig.Th(-1)
   //fmt.Println("MAIN: ",fnd,score)
@@ -332,6 +378,9 @@ func getMedal(pos int) string {
     case SIZE_4K:
       mxpos = []int{191,691,1191}
       mypos = []int{1801,1927}
+    case SIZE_WQHD:
+      mxpos = []int{137,461,794}
+      mypos = []int{1200,1283}
     case SIZE_1080:
       mxpos = []int{95,345,595}
       mypos = []int{900,963}
@@ -343,7 +392,7 @@ func getMedal(pos int) string {
   }
   owig.All().At(x,y)
   if config.dbg_screen {
-    fmt.Println(" Got Pix:",owig.RGB())
+    fmt.Println(" Got Pix:",owig.RGB(),"(",pos,")")
   }
   if (owig.Red()>89) {
     if (owig.Green()>89) {
@@ -377,73 +426,111 @@ func guessHero(col int, row int) string {
   switch owig.res {
     case SIZE_4K:
       heros = []Sign{
-        {name:"Ana"       ,low:Pixel{139,142,149},high:Pixel{101,95,94}},
-        {name:"Bastion"   ,low:Pixel{176,164,132},high:Pixel{171,206,188}},
-        {name:"Brigitte"  ,low:Pixel{113,35,22},high:Pixel{208,133,114}},
-        {name:"Doomfist"  ,low:Pixel{84,61,46},high:Pixel{166,137,112}},
-        {name:"D.Va"      ,low:Pixel{124,81,100},high:Pixel{197,155,125}},
-        {name:"Genji"     ,low:Pixel{80,98,115},high:Pixel{154,148,134}},
-        {name:"Hanzo"     ,low:Pixel{107,68,44},high:Pixel{59,54,58}},
-        {name:"Junkrat"   ,low:Pixel{69,72,84},high:Pixel{199,190,160}},
-        {name:"Lucio"     ,low:Pixel{79,48,36},high:Pixel{65,88,12}},
-        {name:"McCree"    ,low:Pixel{99,23,26},high:Pixel{23,18,22}},
-        {name:"Mei"       ,low:Pixel{171,168,164},high:Pixel{23,23,23}},
-        {name:"Mercy"     ,low:Pixel{50,54,62},high:Pixel{223,191,156}},
-        {name:"Moira"     ,low:Pixel{103,107,121},high:Pixel{188,125,104}},
-        {name:"Orisa"     ,low:Pixel{43,38,35},high:Pixel{188,181,22}},
-        {name:"Pharah"    ,low:Pixel{59,59,67},high:Pixel{130,94,77}},
-        {name:"Reaper"    ,low:Pixel{26,25,26},high:Pixel{42,35,23}},
-        {name:"Reinhardt" ,low:Pixel{46,42,39},high:Pixel{83,77,74}},
-        {name:"Roadhog"   ,low:Pixel{171,138,122},high:Pixel{57,60,66}},
-        {name:"Soldier 76",low:Pixel{172,188,194},high:Pixel{99,0,0}},
-        {name:"Sombra"    ,low:Pixel{122,64,43},high:Pixel{195,132,87}},
-        {name:"Symmetra"  ,low:Pixel{106,99,89},high:Pixel{67,73,67}},
-        {name:"Torbjorn"  ,low:Pixel{203,185,135},high:Pixel{42,40,42}},
-        {name:"Tracer"    ,low:Pixel{165,99,77},high:Pixel{132,32,0}},
-        {name:"Widowmaker",low:Pixel{99,119,179},high:Pixel{23,24,23}},
-        {name:"Winston"   ,low:Pixel{31,31,39},high:Pixel{95,100,109}},
-        {name:"Zarya"     ,low:Pixel{55,97,107},high:Pixel{172,104,78}},
-        {name:"Zenyatta"  ,low:Pixel{30,32,30},high:Pixel{34,28,21}},
+        {"Ana"          ,Pixel{140,143,150},Pixel{99,92,92}},
+        {"Bastion"      ,Pixel{176,164,132},Pixel{171,206,188}},
+        {"Brigitte"     ,Pixel{113,35,22}  ,Pixel{208,133,114}},
+        {"Doomfist"     ,Pixel{84,61,46}   ,Pixel{167,138,114}},
+        {"D.Va"         ,Pixel{124,80,100} ,Pixel{199,156,127}},
+        {"Genji"        ,Pixel{80,98,115},Pixel{155,150,134}},
+        {"Hanzo"        ,Pixel{107,68,44}  ,Pixel{60,55,59}},
+        {"Junkrat"      ,Pixel{69,72,84}   ,Pixel{199,190,160}},
+        {"Lucio"        ,Pixel{79,48,36}   ,Pixel{65,88,12}},
+        {"McCree"       ,Pixel{99,23,26}   ,Pixel{23,18,22}},
+        {"Mei"          ,Pixel{171,168,164},Pixel{23,23,23}},
+        {"Mercy"        ,Pixel{46,51,60}   ,Pixel{225,192,157}},
+        {"Moira"        ,Pixel{102,106,120},Pixel{188,125,104}},
+        {"Orisa"        ,Pixel{44,39,36}   ,Pixel{188,181,22}},
+        {"Pharah"       ,Pixel{59,58,66}   ,Pixel{130,94,78}},
+        {"Reaper"       ,Pixel{26,25,26}   ,Pixel{42,35,23}},
+        {"Reinhardt"    ,Pixel{46,42,39}   ,Pixel{83,77,74}},
+        {"Roadhog"      ,Pixel{171,138,122},Pixel{57,60,66}},
+        {"Soldier 76"   ,Pixel{172,188,194},Pixel{99,0,0}},
+        {"Sombra"       ,Pixel{123,65,44}  ,Pixel{195,132,87}},
+        {"Symmetra"     ,Pixel{105,98,87}  ,Pixel{68,74,66}},
+        {"Torbjörn"     ,Pixel{203,185,135},Pixel{42,40,42}},
+        {"Tracer"       ,Pixel{165,99,77}  ,Pixel{132,32,0}},
+        {"Widowmaker"   ,Pixel{99,119,179} ,Pixel{23,24,23}},
+        {"Winston"      ,Pixel{32,31,40}   ,Pixel{95,101,111}},
+        {"Wrecking Ball",Pixel{57,54,73}   ,Pixel{173,157,148}},
+        {"Zarya"        ,Pixel{55,97,107}  ,Pixel{172,104,78}},
+        {"Zenyatta"     ,Pixel{29,32,29}   ,Pixel{36,30,22}},
       }
 
       xpos   = []int{959,1343,1727,2111,2495,2879}
-      ypown  = []int{1280,1200}
-      ypenemy= []int{670,590}
+      ypown  = []int{1260,1180}
+      ypenemy= []int{690,610}
+
+    case SIZE_WQHD:
+      heros = []Sign{
+        {"Ana"          ,Pixel{106,106,111},Pixel{139,130,123}},
+        {"Bastion"      ,Pixel{142,134,109},Pixel{171,207,187}},
+        {"Brigitte"     ,Pixel{181,162,159},Pixel{203,129,112}},
+        {"Doomfist"     ,Pixel{58,43,33}   ,Pixel{138,108,85}},
+        {"D.Va"         ,Pixel{179,171,159},Pixel{166,124,97}},
+        {"Genji"        ,Pixel{48,40,42}   ,Pixel{183,177,162}},
+        {"Hanzo"        ,Pixel{127,84,52}  ,Pixel{24,19,23}},
+        {"Junkrat"      ,Pixel{126,101,87} ,Pixel{189,182,160}},
+        {"Lucio"        ,Pixel{55,45,36}   ,Pixel{66,91,6}},
+        {"McCree"       ,Pixel{91,21,22}   ,Pixel{68,49,47}},
+        {"Mei"          ,Pixel{156,157,156},Pixel{23,24,22}},
+        {"Mercy"        ,Pixel{66,78,89}   ,Pixel{133,108,85}},
+        {"Moira"        ,Pixel{84,77,67}   ,Pixel{182,117,99}},
+        {"Orisa"        ,Pixel{20,19,20}   ,Pixel{195,185,29}},
+        {"Pharah"       ,Pixel{58,68,83}   ,Pixel{132,92,77}},
+        {"Reaper"       ,Pixel{13,13,13}   ,Pixel{45,38,23}},
+        {"Reinhardt"    ,Pixel{67,65,61}   ,Pixel{91,82,76}},
+        {"Roadhog"      ,Pixel{88,44,36}   ,Pixel{49,48,51}},
+        {"Soldier 76"   ,Pixel{86,95,99}   ,Pixel{86,0,0}},
+        {"Sombra"       ,Pixel{173,102,66} ,Pixel{195,132,87}},
+        {"Symmetra"     ,Pixel{89,46,37}   ,Pixel{48,58,76}},
+        {"Torbjörn"     ,Pixel{197,185,147},Pixel{44,43,44}},
+        {"Tracer"       ,Pixel{124,59,48}  ,Pixel{39,9,0}},
+        {"Widowmaker"   ,Pixel{70,84,147}  ,Pixel{24,22,22}},
+        {"Winston"      ,Pixel{44,43,44}   ,Pixel{99,103,99}},
+        {"Wrecking Ball",Pixel{66,52,57}   ,Pixel{173,158,143}},
+        {"Zarya"        ,Pixel{52,50,47}   ,Pixel{195,125,97}},
+        {"Zenyatta"     ,Pixel{100,110,109},Pixel{6,6,6}},
+      }
+
+      xpos   = []int{640,896,1152,1408,1664,1920}
+      ypown  = []int{835,787}
+      ypenemy= []int{455,407}
 
     case SIZE_1080:
       heros = []Sign{
-        {name:"Ana"       ,low:Pixel{103,103,109},high:Pixel{153,143,138}},
-        {name:"Bastion"   ,low:Pixel{132,126,100},high:Pixel{171,206,186}},
-        {name:"Brigitte"  ,low:Pixel{166,143,138},high:Pixel{203,128,111}},
-        {name:"Doomfist"  ,low:Pixel{57,44,33},high:Pixel{143,114,91}},
-        {name:"D.Va"      ,low:Pixel{178,169,156},high:Pixel{138,101,79}},
-        {name:"Genji"     ,low:Pixel{44,35,36},high:Pixel{144,141,128}},
-        {name:"Hanzo"     ,low:Pixel{121,79,50},high:Pixel{22,17,22}},
-        {name:"Junkrat"   ,low:Pixel{133,108,92},high:Pixel{180,172,153}},
-        {name:"Lucio"     ,low:Pixel{55,46,36},high:Pixel{71,94,11}},
-        {name:"McCree"    ,low:Pixel{90,21,22},high:Pixel{46,34,35}},
-        {name:"Mei"       ,low:Pixel{157,158,157},high:Pixel{23,24,22}},
-        {name:"Mercy"     ,low:Pixel{66,76,88},high:Pixel{136,109,87}},
-        {name:"Moira"     ,low:Pixel{83,74,64},high:Pixel{182,117,99}},
-        {name:"Orisa"     ,low:Pixel{20,19,20},high:Pixel{195,186,29}},
-        {name:"Pharah"    ,low:Pixel{59,69,82},high:Pixel{120,83,68}},
-        {name:"Reaper"    ,low:Pixel{13,13,13},high:Pixel{46,39,23}},
-        {name:"Reinhardt" ,low:Pixel{74,71,64},high:Pixel{92,83,77}},
-        {name:"Roadhog"   ,low:Pixel{84,43,36},high:Pixel{50,48,52}},
-        {name:"Soldier 76",low:Pixel{78,87,92},high:Pixel{84,0,0}},
-        {name:"Sombra"    ,low:Pixel{172,101,66},high:Pixel{195,132,86}},
-        {name:"Symmetra"  ,low:Pixel{89,46,36},high:Pixel{37,51,75}},
-        {name:"Torbjorn"  ,low:Pixel{196,186,151},high:Pixel{44,43,44}},
-        {name:"Tracer"    ,low:Pixel{120,55,44},high:Pixel{29,6,0}},
-        {name:"Widowmaker",low:Pixel{68,84,147},high:Pixel{23,21,22}},
-        {name:"Winston"   ,low:Pixel{44,43,44},high:Pixel{105,111,105}},
-        {name:"Zarya"     ,low:Pixel{52,47,44},high:Pixel{190,122,94}},
-        {name:"Zenyatta"  ,low:Pixel{102,111,111},high:Pixel{8,7,6}},
+        {"Ana"          ,Pixel{103,103,109},Pixel{153,143,138}},
+        {"Bastion"      ,Pixel{132,126,100},Pixel{171,206,186}},
+        {"Brigitte"     ,Pixel{175,155,149},Pixel{203,129,112}},
+        {"Doomfist"     ,Pixel{55,42,32}   ,Pixel{144,115,91}},
+        {"D.Va"         ,Pixel{179,169,156},Pixel{135,99,78}},
+        {"Genji"        ,Pixel{44,35,36}   ,Pixel{154,150,136}},
+        {"Hanzo"        ,Pixel{126,83,52}  ,Pixel{22,17,22}},
+        {"Junkrat"      ,Pixel{133,108,92} ,Pixel{181,174,154}},
+        {"Lucio"        ,Pixel{55,46,36}   ,Pixel{67,92,7}},
+        {"McCree"       ,Pixel{90,21,22}   ,Pixel{46,34,35}},
+        {"Mei"          ,Pixel{157,158,157},Pixel{23,24,22}},
+        {"Mercy"        ,Pixel{66,77,89}   ,Pixel{139,111,89}},
+        {"Moira"        ,Pixel{83,74,64}   ,Pixel{182,117,99}},
+        {"Orisa"        ,Pixel{19,18,19}   ,Pixel{195,186,29}},
+        {"Pharah"       ,Pixel{59,69,82}   ,Pixel{120,83,68}},
+        {"Reaper"       ,Pixel{13,13,13}   ,Pixel{46,39,23}},
+        {"Reinhardt"    ,Pixel{74,71,64}   ,Pixel{92,83,77}},
+        {"Roadhog"      ,Pixel{84,43,36}   ,Pixel{51,49,53}},
+        {"Soldier 76"   ,Pixel{82,91,97}   ,Pixel{84,0,0}},
+        {"Sombra"       ,Pixel{173,102,66} ,Pixel{195,132,87}},
+        {"Symmetra"     ,Pixel{89,46,36}   ,Pixel{34,50,75}},
+        {"Torbjörn"     ,Pixel{196,186,151},Pixel{44,43,44}},
+        {"Tracer"       ,Pixel{120,55,44}  ,Pixel{29,6,0}},
+        {"Widowmaker"   ,Pixel{68,84,147}  ,Pixel{23,21,22}},
+        {"Winston"      ,Pixel{44,43,44}   ,Pixel{107,112,107}},
+        {"Wrecking Ball",Pixel{60,46,52}   ,Pixel{172,156,141}},
+        {"Zarya"        ,Pixel{52,47,44}   ,Pixel{194,124,97}},
+        {"Zenyatta"     ,Pixel{103,112,111},Pixel{6,6,6}},
       }
 
       xpos   = []int{480,672,864,1056,1248,1440}
-      ypown  = []int{636,600}
-      ypenemy= []int{331,295}
+      ypown  = []int{626,590}
+      ypenemy= []int{341,305}
 
   }
 
@@ -463,7 +550,7 @@ func guessHero(col int, row int) string {
     inh=owig.All().At(xpos[col],ypenemy[1]).RGB()
   }
   if config.dbg_screen {
-    fmt.Println(" Got pixels ",inl,inh)
+    fmt.Printf("Got %d,%d Pixel{%d,%d,%d},Pixel{%d,%d,%d}\n",col,row,inl.R,inl.G,inl.B,inh.R,inh.G,inh.B)
   }
 
   for _, el := range heros {
@@ -514,10 +601,13 @@ func getGroups() {
   switch owig.res {
     case SIZE_4K:
       xpos  = []int{1140,1524,1908,2292,2676}
-      ypos  = []int{620,1240}
+      ypos  = []int{644,1218}
+    case SIZE_WQHD:
+      xpos  = []int{760,1016,1272,1528,1784}
+      ypos  = []int{429,812}
     case SIZE_1080:
       xpos  = []int{570,762,954,1146,1338}
-      ypos  = []int{310,620}
+      ypos  = []int{322,609}
   }
   for x:=0;x<6;x++ {
     game.enemy.groupid[x]=0
@@ -600,7 +690,7 @@ func getStats(col int, row int) string {
   }
   return owig.TStat(col,row)
 }
-
+/* Not used anymore...
 func guessCompObjective() string {
   ret:=""
   hc:=0
@@ -616,6 +706,7 @@ func guessCompObjective() string {
   return ret
 
 }
+*/
 
 // ----------------------------------------------------------------------------
 // Get all relevant information from TAB statistics screen
@@ -714,7 +805,8 @@ func parseGameScreen() {
   }
 
   // Determine if we are attacking or defending
-  if game.gametype=="COMPETITIVE PLAY" && game.time != "0:00" {
+  //if game.gametype=="COMPETITIVE PLAY" && game.time != "0:00" {
+  if true {
     switch owig.res {
       case SIZE_4K:
         y=200
@@ -722,6 +814,12 @@ func parseGameScreen() {
         wx=90
         wy=70
         font=FontScore4K
+      case SIZE_WQHD:
+        y=133
+        y2=123
+        wx=60
+        wy=47
+        font=FontScoreWQHD
       case SIZE_1080:
         y=100
         y2=95
@@ -808,6 +906,11 @@ func parseGameScreen() {
       y2=30
       owig.All().Th(220)
       font=FontObjective4K
+    case SIZE_WQHD:
+      y=100
+      y2=20
+      owig.All().Th(200)
+      font=FontObjectiveWQHD
     case SIZE_1080:
       y=75
       y2=15
@@ -888,16 +991,27 @@ func parseGameScreen() {
         // PREPARTE TO ...
         game.objective="WAITING"
         game.state=GS_START
+        // Clear payload stats
+        game.plpoint=0
+        game.pltrack=0
+        game.pltotal=0
+
       }
 
 
-      if strings.HasPrefix(line,"DEF") || strings.HasPrefix(line,"BEF") || strings.HasPrefix(line,"STOP") || strings.HasPrefix(line,"NSES") {
+      if strings.HasPrefix(line,"DEF") || strings.HasPrefix(line,"BEF") || strings.HasPrefix(line,"STOP") || strings.HasSuffix(line,"NSES") {
         // DEFEND OBJECTIVE ...  or STOP THE ... or PREPARE YOUR DEFENSES...
         //(BEF=DEF, but sometimes wrong intepreted..)
         game.side="defend"
-      } else if strings.HasPrefix(line,"AT") || strings.HasPrefix(line,"ESC") || strings.HasPrefix(line,"ACK") {
-        // ATTACK OBJECTIVE ...  or ESCORD THE ... or PREPARE YOUR ATTACK...
+        if config.dbg_ocr {
+          fmt.Println(" Defending")
+        }
+      } else if strings.HasPrefix(line,"AT") || strings.HasPrefix(line,"ESC") || strings.HasSuffix(line,"ACK") {
+        // ATTACK OBJECTIVE ...  or ESCORD THE ... or PREPARE TO ATTACK...
         game.side="attack"
+        if config.dbg_ocr {
+          fmt.Println(" Attacking")
+        }
       }
 
       if game.objective=="PAYLOAD" {
@@ -909,6 +1023,11 @@ func parseGameScreen() {
             y2=320
             x=1571
             xr=2370
+          case SIZE_WQHD:
+            y=191
+            y2=213
+            x=1048
+            xr=1580
           case SIZE_1080:
             y=143
             y2=160
@@ -1014,6 +1133,16 @@ func parseGameScreen() {
         game.pltrack=tperc
         game.pltotal=perc
 
+        if game.pltotal==100 {
+          game.plpoint=pcnt
+          game.pltrack=0
+        }
+
+        // weird bugfix
+        if game.pltrack<0 {
+          game.pltrack=0
+        }
+
         if config.dbg_screen {
           fmt.Println(" Color: ",ch," Start: ",x," End: ",end," Percentage: ",perc)
           fmt.Println(" On traject: ",xl," to: ",xr," Percentage: ",tperc)
@@ -1044,6 +1173,8 @@ func parseAssembleScreen() {
   switch owig.res {
     case SIZE_4K:
       P=owig.All().At(194,152).RGB()
+    case SIZE_WQHD:
+      P=owig.All().At(116,101).RGB()
     case SIZE_1080:
       P=owig.All().At(87,76).RGB()
   }
@@ -1070,9 +1201,15 @@ func parseEndScreen() {
     case SIZE_4K:
       owig.From(100,94).To(468,178).Th(145).Filter()
       crc=owig.From(100,94).To(468,178).Cs()
+    case SIZE_WQHD:
+      owig.From(67,63).To(312,119).Th(145).Filter()
+      crc=owig.From(67,63).To(312,119).Cs()
     case SIZE_1080:
       owig.From(50,47).To(234,89).Th(145).Filter()
       crc=owig.From(50,47).To(234,89).Cs()
+  }
+  if config.dbg_screen {
+    fmt.Println("Endscreen crc =",crc)
   }
   if (crc== "5F04") {
     game.result="lost"
@@ -1096,6 +1233,11 @@ func checkChat() {
       x2=202
       y=130
       w=10
+    case SIZE_WQHD:
+      x1=81
+      x2=133
+      y=88
+      w=5
     case SIZE_1080:
       x1=61
       x2=101
@@ -1137,6 +1279,12 @@ func onFireIcon() bool {
       xstart=528
       dx=24
       dy=38
+    case SIZE_WQHD:
+      ystart=1360
+      yend=1320
+      xstart=352
+      dx=16
+      dy=25
     case SIZE_1080:
       ystart=1020
       yend=990
@@ -1216,10 +1364,14 @@ func interpret() {
       }
     case SC_ASSEMBLE:
       if game.state!=GS_END||game.image {
-        if game.pscreen!=game.screen {
+        if game.pscreen != game.screen {
           game.state=GS_START
           game.forceM=false
           game.forceT=false
+          game.plpoint=0
+          game.plamount=0
+          game.pltrack=0
+          game.pltotal=0
         }
         dbgWindow("Assemble team detected "+game.side)
       }
@@ -1228,6 +1380,10 @@ func interpret() {
       parseTabStats()
       if game.time=="0:00" {
         game.state=GS_START
+        game.plpoint=0
+        game.plamount=0
+        game.pltrack=0
+        game.pltotal=0
       } else {
         game.state=GS_RUN
       }

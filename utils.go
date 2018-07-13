@@ -45,6 +45,7 @@ func getStatsline(hero string, i int) string {
 // Set stat names for each hero 
 func initHStats() {
   heroStats=map[string][]string{
+
     "Ana":{
        "Unscoped Accuracy",
        "Scoped Accuracy",
@@ -53,6 +54,7 @@ func initHStats() {
        "Enemies Slept",
        "",
     },
+
     "Bastion":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -61,15 +63,16 @@ func initHStats() {
        "Tank Kills",
        "Self Healing",
     },
+
     "Brigitte":{
        "Offensive Assists",
        "Defensive Assists",
        "Damage Blocked",
        "Armor Provided",
-       "",
-       "",
+       "Inspire Uptime Percentage",
        "",
     },
+
     "Doomfist":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -78,6 +81,7 @@ func initHStats() {
        "Meteor Strike Kill",
        "Shields Created",
     },
+
     "D.Va":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -86,6 +90,7 @@ func initHStats() {
        "Mechs Called",
        "",
     },
+
     "Genji":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -94,15 +99,16 @@ func initHStats() {
        "Dragonblade Kills",
        "",
     },
+
     "Hanzo":{
        "Weapon Accuracy",
        "Kill Streak - Best",
        "Final Blows",
-       "Damage Reflected",
        "Critical Hits",
        "Recon Assists",
        "Dragonstrike Kills",
     },
+
     "Junkrat":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -119,6 +125,7 @@ func initHStats() {
        "Defensive Assists",
        "",
     },
+
     "McCree":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -135,14 +142,16 @@ func initHStats() {
        "Self Healing",
        "",
     },
+
     "Mercy":{
        "Offensive Assists",
        "Defense Assists",
        "Player Resurrected",
        "Blaster Kills",
-       "",
+       "Damage Amplified",
        "",
     },
+
     "Moira":{
        "Secondary Fire Accuracy",
        "Kill Streak - Best",
@@ -151,6 +160,7 @@ func initHStats() {
        "Coalescence Healing",
        "Self Healing",
     },
+
     "Orisa":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -159,6 +169,7 @@ func initHStats() {
        "Damage Amplified",
        "",
     },
+
     "Pharah":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -167,6 +178,7 @@ func initHStats() {
        "Rocket Direct Hits",
        "",
     },
+
     "Reaper":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -183,6 +195,7 @@ func initHStats() {
        "Earthshatter Kills",
        "",
     },
+
     "Roadhog":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -191,6 +204,7 @@ func initHStats() {
        "Self Healing",
        "Whole Hog Kills",
     },
+
     "Soldier 76":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -199,6 +213,7 @@ func initHStats() {
        "Tactical Visor Kills",
        "",
     },
+
     "Sombra":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -207,22 +222,25 @@ func initHStats() {
        "Enemies EMP'D",
        "",
     },
+
     "Symmetra":{
        "Sentry Turret Kills",
        "Kill Streak - Best",
        "Damage Blocked",
        "Players Teleported",
-       "Teleporter Uptime - Average",
-       "",
+       "Primary Fire Accuracy",
+       "Secondary Fire Accuracy",
     },
-    "Torbjorn":{
+
+    "Torbjörn":{
        "Weapon Accuracy",
        "Kill Streak - Best",
-       "Torbjorn Kills",
+       "Torbjörn Kills",
        "Turret Kills",
        "Molten Core Kills",
        "Armor Packs Created",
     },
+
     "Tracer":{
        "Weapon Accuracy",
        "Kill Streak - Best",
@@ -231,6 +249,7 @@ func initHStats() {
        "Pulse Bombs Attached",
        "",
     },
+
     "Widowmaker":{
        "Scoped Accuracy",
        "Kill Streak - Best",
@@ -239,14 +258,25 @@ func initHStats() {
        "Recon Assists",
        "",
     },
+
     "Winston":{
        "Damage Blocked",
        "Kill Streak - Best",
        "Melee Kill",
        "Players Knocked Back",
-       "",
+       "Primal Rage Kills",
        "",
     },
+
+    "Wrecking Ball":{
+       "Weapon Accuracy",
+       "Kill Streak - Best",
+       "Final Blows",
+       "Grappling Claw Kills",
+       "Piledriver Kills",
+       "Minefield Kills",
+    },
+
     "Zarya":{
        "Damage Blocked",
        "Kill Streak - Best",

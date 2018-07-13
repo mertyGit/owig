@@ -3,11 +3,23 @@ Overwatch Information Grabber
 This program runs alongside your Overwatch game and get statistics and other information by grabbing screen on certain intervals and deciphering it.
 Information will be displayed on seperate window and written to disk to be analyzed later on with tool of your choice.
 
-At this moment, will work only with two resolutions: 1080p (1920x1080) or 4K (3840x2160). 
+At this moment, will work only with three resolutions: 1080p (1920x1080), WQHD (2560x1440) or 4K (3840x2160). 
 Don't use programs that are using overlays like Discord, it will mess with the recognition
 
 # Release information
 WARNING: STILL BETA Usable to track on going progress and stats, but no garantees whatsover
+
+Version 0.94: 
+New functionality:
+- WQHD resolution (2560x1440) added
+- Adjusted to latest changes in GUI of Overview Screen (current, high SR)
+- Adjusted to latest changes in TAB Screen (position of icons)
+- Added Hero "Wrecking Ball"
+- Changed to latest changes in Hero Stats (like Symetra)
+
+Bug Fixes:
+- Torbjorn to Torbjörn
+- Incidently not recognizing of TAB screen fixed
 
 Version 0.93: 
 

@@ -39,33 +39,34 @@ var owigsign walk.Image
 
 func loadIcons() {
   heroIcons = []Icons{
-    {name:"Ana"       ,file:"Ana_icon.png"       ,img:nil},
-    {name:"Bastion"   ,file:"Bastion_icon.png"   ,img:nil},
-    {name:"Brigitte"  ,file:"Brigitte_icon.png"  ,img:nil},
-    {name:"Doomfist"  ,file:"Doomfist_icon.png"  ,img:nil},
-    {name:"D.Va"      ,file:"DVa_icon.png"       ,img:nil},
-    {name:"Genji"     ,file:"Genji_icon.png"     ,img:nil},
-    {name:"Hanzo"     ,file:"Hanzo_icon.png"     ,img:nil},
-    {name:"Junkrat"   ,file:"Junkrat_icon.png"   ,img:nil},
-    {name:"Lucio"     ,file:"Lucio_icon.png"     ,img:nil},
-    {name:"McCree"    ,file:"McCree_icon.png"    ,img:nil},
-    {name:"Mei"       ,file:"Mei_icon.png"       ,img:nil},
-    {name:"Mercy"     ,file:"Mercy_icon.png"     ,img:nil},
-    {name:"Moira"     ,file:"Moira_icon.png"     ,img:nil},
-    {name:"Orisa"     ,file:"Orisa_icon.png"     ,img:nil},
-    {name:"Pharah"    ,file:"Pharah_icon.png"    ,img:nil},
-    {name:"Reaper"    ,file:"Reaper_icon.png"    ,img:nil},
-    {name:"Reinhardt" ,file:"Reinhardt_icon.png" ,img:nil},
-    {name:"Roadhog"   ,file:"Roadhog_icon.png"   ,img:nil},
-    {name:"Soldier 76",file:"Soldier76_icon.png" ,img:nil},
-    {name:"Sombra"    ,file:"Sombra_icon.png"    ,img:nil},
-    {name:"Symmetra"  ,file:"Symmetra_icon.png"  ,img:nil},
-    {name:"Torbjorn"  ,file:"Torbjorn_icon.png"  ,img:nil},
-    {name:"Tracer"    ,file:"Tracer_icon.png"    ,img:nil},
-    {name:"Widowmaker",file:"Widowmaker_icon.png",img:nil},
-    {name:"Winston"   ,file:"Winston_icon.png"   ,img:nil},
-    {name:"Zarya"     ,file:"zarya_icon.png"     ,img:nil},
-    {name:"Zenyatta"  ,file:"Zenyatta_icon.png"  ,img:nil},
+    {name:"Ana"          ,file:"Ana_icon.png"       ,img:nil},
+    {name:"Bastion"      ,file:"Bastion_icon.png"   ,img:nil},
+    {name:"Brigitte"     ,file:"Brigitte_icon.png"  ,img:nil},
+    {name:"Doomfist"     ,file:"Doomfist_icon.png"  ,img:nil},
+    {name:"D.Va"         ,file:"DVa_icon.png"       ,img:nil},
+    {name:"Genji"        ,file:"Genji_icon.png"     ,img:nil},
+    {name:"Hanzo"        ,file:"Hanzo_icon.png"     ,img:nil},
+    {name:"Junkrat"      ,file:"Junkrat_icon.png"   ,img:nil},
+    {name:"Lucio"        ,file:"Lucio_icon.png"     ,img:nil},
+    {name:"McCree"       ,file:"McCree_icon.png"    ,img:nil},
+    {name:"Mei"          ,file:"Mei_icon.png"       ,img:nil},
+    {name:"Mercy"        ,file:"Mercy_icon.png"     ,img:nil},
+    {name:"Moira"        ,file:"Moira_icon.png"     ,img:nil},
+    {name:"Orisa"        ,file:"Orisa_icon.png"     ,img:nil},
+    {name:"Pharah"       ,file:"Pharah_icon.png"    ,img:nil},
+    {name:"Reaper"       ,file:"Reaper_icon.png"    ,img:nil},
+    {name:"Reinhardt"    ,file:"Reinhardt_icon.png" ,img:nil},
+    {name:"Roadhog"      ,file:"Roadhog_icon.png"   ,img:nil},
+    {name:"Soldier 76"   ,file:"Soldier76_icon.png" ,img:nil},
+    {name:"Sombra"       ,file:"Sombra_icon.png"    ,img:nil},
+    {name:"Symmetra"     ,file:"Symmetra_icon.png"  ,img:nil},
+    {name:"Torbjorn"     ,file:"Torbjorn_icon.png"  ,img:nil},
+    {name:"Tracer"       ,file:"Tracer_icon.png"    ,img:nil},
+    {name:"Widowmaker"   ,file:"Widowmaker_icon.png",img:nil},
+    {name:"Winston"      ,file:"Winston_icon.png"   ,img:nil},
+    {name:"Wrecking Ball",file:"Wrecking_icon.png"  ,img:nil},
+    {name:"Zarya"        ,file:"zarya_icon.png"     ,img:nil},
+    {name:"Zenyatta"     ,file:"Zenyatta_icon.png"  ,img:nil},
   }
   for i,v := range heroIcons {
     //fmt.Println("Got i,v",i,v.file)
@@ -298,13 +299,12 @@ func (mw *MyMainWindow) drawWindow(canvas *walk.Canvas, updateBounds walk.Rectan
   }
 
   // Display special Statistics
-  hero:=game.own.hero[0]
   for y:=0;y<6;y++ {
     rbounds.X=250+xoff
     rbounds.Y=235+y*20
     rbounds.Height=20
     rbounds.Width=200
-    canvas.DrawText(getStatsline(hero,y),sfont,walk.RGB(180,180,180),rbounds, 0)
+    canvas.DrawText(getStatsline(game.hero,y),sfont,walk.RGB(180,180,180),rbounds, 0)
     rbounds.X=400+xoff
     rbounds.Width=20
     canvas.DrawText(":",sfont,walk.RGB(180,180,180),rbounds, 0)

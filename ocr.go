@@ -197,6 +197,10 @@ func (g *OWImg) getPattern() (string,int) {
       bx2=bx+50
       by2=by+50
       font=Icon4K
+    case SIZE_WQHD:
+      bx2=bx+40
+      by2=by+40
+      font=IconWQHD
     case SIZE_1080:
       bx2=bx+25
       by2=by+25
@@ -338,12 +342,19 @@ func (g *OWImg) Title() string {
       font=FontTitle4K
       space=10
       divider=30
+    case SIZE_WQHD:
+      bx,by=85,46
+      bx2,by2=667,70
+      font=FontTitleWQHD
+      space=7
+      divider=20
     case SIZE_1080:
       bx,by=64,35
       bx2,by2=500,52
       font=FontTitle1080
       space=5
       divider=15
+
   }
   // Turn red & yellow into white, to get all text read
   g.All()
@@ -401,13 +412,17 @@ func (g *OWImg) SRHigh() int {
 
   switch g.res {
     case SIZE_4K:
-      bx,by=3155,405
-      bx2,by2=3283,465
+      bx,by=2906,405
+      bx2,by2=3026,465
       font=FontSR4K
     case SIZE_1080:
-      bx,by=1577,202
-      bx2,by2=1641,233
+      bx,by=1453,202
+      bx2,by2=1513,233
       font=FontSR1080
+    case SIZE_WQHD:
+      bx,by=1934,270
+      bx2,by2=2018,310
+      font=FontSRWQHD
   }
 
   for x:=0; x<bx2-bx; x++ {
@@ -456,13 +471,17 @@ func (g *OWImg) SRCurrent() int {
 
   switch g.res {
     case SIZE_4K:
-      bx,by=3155,245
-      bx2,by2=3283,305
+      bx,by=2906,245
+      bx2,by2=3026,305
       font=FontSR4K
     case SIZE_1080:
-      bx,by=1577,122
-      bx2,by2=1641,153
+      bx,by=1453,122
+      bx2,by2=1513,153
       font=FontSR1080
+    case SIZE_WQHD:
+      bx,by=1934,164
+      bx2,by2=2018,203
+      font=FontSRWQHD
   }
 
   for x:=0; x<bx2-bx; x++ {
@@ -513,6 +532,10 @@ func (g *OWImg) SRGain() int {
       bx,by=1738,915
       bx2,by2=2030,1060
       font=FontBigSR4K
+    case SIZE_WQHD:
+      bx,by=1143,609
+      bx2,by2=1357,706
+      font=FontBigSRWQHD
     case SIZE_1080:
       bx,by=859,457
       bx2,by2=1018,530
@@ -571,6 +594,10 @@ func (g *OWImg) TTime() string {
       bx,by=200,110
       bx2,by2=320,136
       font=FontTime4K
+    case SIZE_WQHD:
+      bx,by=133,73
+      bx2,by2=213,91
+      font=FontTimeWQHD
     case SIZE_1080:
       bx,by=100,55
       bx2,by2=160,68
@@ -638,13 +665,18 @@ func (g *OWImg) TStat(col,row int) string {
       cols_r= []int{500,1000,1500,2360,3000,3540}
       rows_u= []int{1780,1830}
       rows_b= []int{1910,1960}
+    case SIZE_WQHD:
+      font=FontStatsWQHD
+      cols_l= []int{172,505,838,1373,1733,2093}
+      cols_r= []int{333,665,997,1569,1995,2301}
+      rows_u= []int{1193,1219}
+      rows_b= []int{1277,1303}
     case SIZE_1080:
       font=FontStats1080
       cols_l= []int{128,378,627,1030,1300,1570}
       cols_r= []int{250,500,750,1180,1500,1770}
-      rows_u= []int{890,915}
-      rows_b= []int{955,980}
-      //g.Th(100) // smaller chars are more prone to read errors
+      rows_u= []int{890,920}
+      rows_b= []int{955,985}
   }
   bx=cols_l[col]
   by=rows_u[row]
@@ -668,6 +700,7 @@ func (g *OWImg) TStat(col,row int) string {
     }
   }
   //g.Save("ocr.png")
+  line=strings.Replace(line,",,",":",1)  // : is intepreted as two single dots
   line=strings.Replace(line,",","",1)    // : 9,999 => 9999
   line=strings.Replace(line,"%%%","%",1) // : percentage is read as 3 chars
   line=strings.Replace(line,"..",":",1)  // : is intepreted as two single dots
@@ -696,6 +729,11 @@ func (g *OWImg) MyHero() string {
       bx,by=1900,1660
       bx2,by2=2400,1750
       font=FontHero4K
+    case SIZE_WQHD:
+      bx,by=1270,1110
+      bx2,by2=1570,1160
+      font=FontHeroWQHD
+      g.Th(190)
     case SIZE_1080:
       bx,by=750,830
       bx2,by2=1200,875
@@ -728,6 +766,15 @@ func (g *OWImg) MyHero() string {
       line="Bastion"
 
     case "BRIGITTE":
+      line="Brigitte"
+
+    case "BRIGITFE":
+      line="Brigitte"
+
+    case "BRIGIFFE":
+      line="Brigitte"
+
+    case "BRIGIFTE":
       line="Brigitte"
 
     case "DOOMFIST":
@@ -800,13 +847,13 @@ func (g *OWImg) MyHero() string {
       line="Symmetra"
 
     case "TOR6JO..RN":
-      line="Torbjorn"
+      line="Torbjörn"
 
     case "TORBJO..RN":
-      line="Torbjorn"
+      line="Torbjörn"
 
     case "TORBJORN":
-      line="Torbjorn"
+      line="Torbjörn"
 
     case "TRACER":
       line="Tracer"
@@ -820,8 +867,17 @@ func (g *OWImg) MyHero() string {
     case "WIDOWMAKER":
       line="Widowmaker"
 
+    case "WIDUWMAKER":
+      line="Widowmaker"
+
     case "WINSTON":
       line="Winston"
+
+    case "WRECKINGBALL":
+      line="Wrecking Ball"
+
+    case "WRECKINGBAIL":
+      line="Wrecking Ball"
 
     case "ZARYA":
       line="Zarya"
