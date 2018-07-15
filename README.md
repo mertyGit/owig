@@ -7,9 +7,13 @@ At this moment, will work only with three resolutions: 1080p (1920x1080), WQHD (
 Don't use programs that are using overlays like Discord, it will mess with the recognition
 
 # Release information
-WARNING: STILL BETA Usable to track on going progress and stats, but no garantees whatsover
+
+Version 1.00: 
+- Updated to final version
+- Minor cleanup in code
 
 Version 0.94: 
+
 New functionality:
 - WQHD resolution (2560x1440) added
 - Adjusted to latest changes in GUI of Overview Screen (current, high SR)

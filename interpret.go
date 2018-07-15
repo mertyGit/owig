@@ -65,9 +65,6 @@ func guessScreen() int {
     return SC_TAB
   }
 
-
-
-
   // Victory or Defeat Screen ? 
   // Vertical image line in middle with same value
   switch owig.res {
@@ -81,7 +78,6 @@ func guessScreen() int {
       same=owig.Box(910,500,0,20).isLine()
       s1=owig.All().At(910,500).RGB()
   }
-
   if same {
     // which one, Victory or Defeat, yellow or red ?
     if s1.R>220 && s1.G<5 {
@@ -138,11 +134,6 @@ func guessScreen() int {
     return SC_ENDING
   }
 
-
-
-
-
-
   // Career Screen ? 
   // White Pixel border for player icon on left top
   switch owig.res {
@@ -150,17 +141,16 @@ func guessScreen() int {
       same=owig.Box(100,400,0,200).isLine()
       s1=owig.All().At(100,400).RGB()
       pos=550
-    case SIZE_1080:
-      same=owig.Box(50,200,0,100).isLine()
-      s1=owig.All().At(50,200).RGB()
-      pos=280
     case SIZE_WQHD:
       same=owig.Box(70,250,0,100).isLine()
       s1=owig.All().At(70,250).RGB()
       pos=380
+    case SIZE_1080:
+      same=owig.Box(50,200,0,100).isLine()
+      s1=owig.All().At(50,200).RGB()
+      pos=280
   }
   owig.All()
-
   // + blue stripe behind icon, middle
   if same && s1.R>220 && s1.G>220 && s1.B>220 {
     s1=owig.At(500,pos).RGB()
@@ -334,10 +324,10 @@ func guessScreen() int {
   switch owig.res {
     case SIZE_4K:
       fnd,score=owig.At(414,134).getPattern()
-    case SIZE_1080:
-      fnd,score=owig.At(207,67).getPattern()
     case SIZE_WQHD:
       fnd,score=owig.At(271,90).getPattern()
+    case SIZE_1080:
+      fnd,score=owig.At(207,67).getPattern()
   }
   owig.Th(-1)
   //fmt.Println("MAIN: ",fnd,score)
@@ -455,7 +445,6 @@ func guessHero(col int, row int) string {
         {"Zarya"        ,Pixel{55,97,107}  ,Pixel{172,104,78}},
         {"Zenyatta"     ,Pixel{29,32,29}   ,Pixel{36,30,22}},
       }
-
       xpos   = []int{959,1343,1727,2111,2495,2879}
       ypown  = []int{1260,1180}
       ypenemy= []int{690,610}
@@ -491,7 +480,6 @@ func guessHero(col int, row int) string {
         {"Zarya"        ,Pixel{52,50,47}   ,Pixel{195,125,97}},
         {"Zenyatta"     ,Pixel{100,110,109},Pixel{6,6,6}},
       }
-
       xpos   = []int{640,896,1152,1408,1664,1920}
       ypown  = []int{835,787}
       ypenemy= []int{455,407}
@@ -527,11 +515,9 @@ func guessHero(col int, row int) string {
         {"Zarya"        ,Pixel{52,47,44}   ,Pixel{194,124,97}},
         {"Zenyatta"     ,Pixel{103,112,111},Pixel{6,6,6}},
       }
-
       xpos   = []int{480,672,864,1056,1248,1440}
       ypown  = []int{626,590}
       ypenemy= []int{341,305}
-
   }
 
   var dev=0
@@ -690,23 +676,6 @@ func getStats(col int, row int) string {
   }
   return owig.TStat(col,row)
 }
-/* Not used anymore...
-func guessCompObjective() string {
-  ret:=""
-  hc:=0
-
-  switch owig.res {
-    case SIZE_4K:
-      hc=owig.From(1748,152).To(2080,152).Th(36).Holes()
-    case SIZE_1080:
-      hc=owig.From(877,75).To(1040,75).Th(36).Holes()
-  }
-  owig.Th(-1)
-  hc++
-  return ret
-
-}
-*/
 
 // ----------------------------------------------------------------------------
 // Get all relevant information from TAB statistics screen
@@ -827,7 +796,7 @@ func parseGameScreen() {
         wy=35
         font=FontScore1080
     }
-    fnd:=false
+    fnd :=false
     fndl:=false
     fndr:=false
     owig.All()
