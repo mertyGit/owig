@@ -6,6 +6,8 @@ Information will be displayed on seperate window and written to disk to be analy
 At this moment, will work only with three resolutions: 1080p (1920x1080), WQHD (2560x1440) or 4K (3840x2160). 
 Don't use programs that are using overlays like Discord, it will mess with the recognition
 
+Version 1.00 is now available to download to. Please check https://www.mertymade.com/owig/
+
 # Release information
 
 Version 1.00: 
