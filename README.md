@@ -1,3 +1,8 @@
+# Not updated anymore
+This program is, and will, not be updated. Due to concerns of people getting banned using simular programs, I don't think it is wise to use. 
+Therefore, this is here just for archiving / inspiration. The basic mechanisms can still be used for a lot of other games or even writing bots...
+
+
 # owig
 Overwatch Information Grabber
 This program runs alongside your Overwatch game and get statistics and other information by grabbing screen on certain intervals and deciphering it.
